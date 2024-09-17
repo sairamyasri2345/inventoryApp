@@ -33,7 +33,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
     const fetchApprovedCounts = async () => {
       try {
         const response = await fetch(
-          "https://inventory-application-1.onrender.com/appliedProducts"
+          "http://localhost:3003/appliedProducts"
         );
         const data = await response.json();
         const counts = data.reduce((acc, item) => {
