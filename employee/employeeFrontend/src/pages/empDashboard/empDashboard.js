@@ -18,32 +18,21 @@ const EmployeeDashboard = ({ filterText,userData }) => {
 
   
 
+ 
+
   useEffect(() => {
-    const token = window.localStorage.getItem('token');
-    if (token) {
-      fetch("http://localhost:3003/layout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.status === "ok") {
-            setEmployeeId(data.data.email);
-          } else {
-            console.error("Error fetching user data:", data.error);
-          }
-        });
+    if (userData) {
+      setEmployeeId(userData.employeeId); 
     }
-  }, []);
+  }, [userData]);
+
+
 
   useEffect(() => {
     const fetchAppliedProducts = async () => {
       try {
-        const response = await axios.get(`http://localhost:3003/appliedProducts/${employeeId}`);
-
+        const response = await axios.get(`http://localhost:3003/appliedProducts/${userData?.employeeId}`);
+        console.log(userData,"user")
         if (response.status === 200) {
           setAppliedProducts(response.data);
         } else {
@@ -55,6 +44,7 @@ const EmployeeDashboard = ({ filterText,userData }) => {
     };
 
     if (employeeId) {
+      console.log(employeeId,"emp")
       fetchAppliedProducts();
     }
   }, [employeeId]);
@@ -100,19 +90,37 @@ const EmployeeDashboard = ({ filterText,userData }) => {
 
   const handleApplyProduct = async (formData) => {
     try {
+      const employeeId = localStorage.getItem('employeeId');
+      const employeeName =userData?.employeeName;
+     
+      
+      if (!employeeId || !employeeName) {
+        console.error('Employee details not found in localStorage.');
+        return;
+      }
+  
+      // Add employee details to formData
+      const productData = {
+        ...formData,
+        employeeId,
+        employeeName,
+      };
+  
       let response;
       if (editMode) {
-        response = await axios.put(`http://localhost:3003/updateProduct/${currentProduct._id}`, formData);
+        response = await axios.put(`http://localhost:3003/updateProduct/${currentProduct._id}`, productData);
         setAppliedProducts(appliedProducts.map(product => product._id === currentProduct._id ? response.data : product));
       } else {
-        response = await axios.post('http://localhost:3003/applyProduct', formData);
+        response = await axios.post('http://localhost:3003/applyProduct', productData);
         setAppliedProducts([...appliedProducts, response.data]);
       }
+      
       handleClose();
     } catch (error) {
       console.error('Error applying product:', error);
     }
   };
+  
   const handleEdit = (product) => {
     const timeSinceApplied = new Date() - new Date(product.date);
     if (timeSinceApplied > TIME_LIMIT) {

@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("./adminDetails");
 require("./productschema");
-  require('./empSchema');
+require("./empSchema");
 
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
@@ -74,7 +74,9 @@ app.post("/empLogin", async (req, res) => {
 
       return res.status(200).json({ status: "ok", data: token });
     } else {
-      return res.status(401).json({ status: "error", error: "Invalid Password" });
+      return res
+        .status(401)
+        .json({ status: "error", error: "Invalid Password" });
     }
   } catch (error) {
     console.error("Login error:", error);
@@ -83,7 +85,7 @@ app.post("/empLogin", async (req, res) => {
 });
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
+  const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
@@ -93,7 +95,6 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
-
 
 app.put("/changePassword", verifyToken, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
@@ -148,14 +149,13 @@ app.post("/layout", async (req, res) => {
 // });
 
 app.post("/products", async (req, res) => {
-  const { productName, quantity, description} = req.body;
+  const { productName, quantity, description } = req.body;
 
   try {
     const newProduct = new Product({
       productName,
       quantity,
       description,
-    
     });
 
     const savedProduct = await newProduct.save();
@@ -167,12 +167,12 @@ app.post("/products", async (req, res) => {
 
 app.put("/products/:id", async (req, res) => {
   const { id } = req.params;
-  const { productName, quantity, description} = req.body;
+  const { productName, quantity, description } = req.body;
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { productName, quantity, description, },
+      { productName, quantity, description },
       { new: true }
     );
 
@@ -203,32 +203,52 @@ app.get("/products", async (req, res) => {
 });
 
 //add employee
-app.post('/addEmployees', async (req, res) => {
+app.post("/addEmployees", async (req, res) => {
   try {
-  
     const newEmployee = await Employee.create({
-      ...req.body
+      ...req.body,
     });
     res.status(200).json(newEmployee);
   } catch (error) {
-    res.status(500).json({ message: 'Error saving employee' });
+    res.status(500).json({ message: "Error saving employee" });
   }
 });
 
-
-
-app.get('/employeeData', async (req, res) => {
+app.get("/employeeData", async (req, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/getEmployeeDetails", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const employee = await Employee.findOne({ email });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.status(200).json({
+      status: "ok",
+      employee: {
+        email: employee.email,
+        password: employee.password,
+        employeeId: employee.employeeId,
+        employeeName: employee.name,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 });
 
 
-
-const PORT=3001;
+const PORT = 3001;
 
 app.listen(PORT, () => {
   console.log("Server started on port 3001");

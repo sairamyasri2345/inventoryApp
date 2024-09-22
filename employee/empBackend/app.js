@@ -53,30 +53,30 @@ app.post("/empSignup", async (req, res) => {
   }
 });
 
-app.post("/empLogin", async (req, res) => {
-  const { email, password } = req.body;
+// app.post("/empLogin", async (req, res) => {
+//   const { email, password } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
+//   try {
+//     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ error: "User Not Found" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ error: "User Not Found" });
+//     }
 
-    if (await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-        expiresIn: "2h",
-      });
+//     if (await bcrypt.compare(password, user.password)) {
+//       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+//         expiresIn: "2h",
+//       });
 
-      return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
-    }
+//       return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
+//     }
 
-    return res.status(401).json({ status: "error", error: "Invalid Password" });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ status: "error", error: "Server Error" });
-  }
-});
+//     return res.status(401).json({ status: "error", error: "Invalid Password" });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.status(500).json({ status: "error", error: "Server Error" });
+//   }
+// });
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -84,7 +84,7 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: "Unauthorized" });
 
-    req.userId = decoded.userId;
+    req.userId = decoded.employeeId;
     next();
   });
 };
@@ -92,7 +92,7 @@ const verifyToken = (req, res, next) => {
 
 app.put("/changePassword", verifyToken, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const userId = req.userId;
+  const userId = req.employeeId;
 
   try {
     const user = await User.findById(userId);
