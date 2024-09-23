@@ -247,6 +247,23 @@ app.post("/getEmployeeDetails", async (req, res) => {
   }
 });
 
+app.put('/changePwd', async (req, res) => {
+  const { employeeId, newPassword } = req.body;
+  
+  try {
+    const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
+    
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
 
 const PORT = 3001;
 

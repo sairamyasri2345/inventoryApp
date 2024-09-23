@@ -43,12 +43,11 @@ const EmployeeDashboard = ({ filterText,userData }) => {
       }
     };
 
+    const employeeId = window.localStorage.getItem('employeeId');
     if (employeeId) {
-      console.log(employeeId,"emp")
       fetchAppliedProducts();
     }
-  }, [employeeId]);
-
+  }, []);
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
@@ -90,16 +89,19 @@ const EmployeeDashboard = ({ filterText,userData }) => {
 
   const handleApplyProduct = async (formData) => {
     try {
-      const employeeId = localStorage.getItem('employeeId');
-      const employeeName =userData?.employeeName;
-     
-      
+      let employeeId = localStorage.getItem('employeeId');
+      let employeeName = localStorage.getItem('employeeName');
+  
       if (!employeeId || !employeeName) {
-        console.error('Employee details not found in localStorage.');
-        return;
+        if (userData) {
+          employeeId = userData.employeeId;
+          employeeName = userData.employeeName;
+        } else {
+          console.error('Employee details not found in localStorage or userData.');
+          return;
+        }
       }
   
-      // Add employee details to formData
       const productData = {
         ...formData,
         employeeId,
@@ -114,12 +116,13 @@ const EmployeeDashboard = ({ filterText,userData }) => {
         response = await axios.post('http://localhost:3003/applyProduct', productData);
         setAppliedProducts([...appliedProducts, response.data]);
       }
-      
+  
       handleClose();
     } catch (error) {
       console.error('Error applying product:', error);
     }
   };
+  
   
   const handleEdit = (product) => {
     const timeSinceApplied = new Date() - new Date(product.date);

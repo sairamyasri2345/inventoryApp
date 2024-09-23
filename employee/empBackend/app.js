@@ -6,6 +6,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("./userDetails");
 require("./productApply"); 
+const Employee = require('../../admin/adminBackend/empSchema'); 
 
 const User = mongoose.model("UserInfo");
 const ProductApplication = mongoose.model("ProductApplication");
@@ -150,7 +151,7 @@ app.get("/appliedProducts", async (req, res) => {
   const query = {};
   if (employeeId) query.employeeId = employeeId;
   if (productId) query.productId = productId;
-
+  console.log("Query:", query);
   try {
     const products = await ProductApplication.find(query);
     res.status(200).json(products);
@@ -158,8 +159,6 @@ app.get("/appliedProducts", async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
-
-
 
 app.post("/applyProduct", async (req, res) => {
   const { employeeId, employeeName, productName, quantity } = req.body;
@@ -177,8 +176,6 @@ app.post("/applyProduct", async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
-
-
 
 const canEditOrDelete = async (req, res, next) => {
   try {

@@ -1,85 +1,100 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./changePassword.css";
 
 const ChangePassword = () => {
-  const [oldPassword, setOldPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(""); // To store success or error message
+  const [messageType, setMessageType] = useState(""); // To store the type of message ('success' or 'error')
+  const navigate = useNavigate();
 
-  const handlePasswordChange = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      setMessage("User not authenticated");
-      return;
-    }
+    setMessage(""); // Clear any previous messages
 
     try {
-      const response = await axios.put(
-        'http://localhost:3003/changePassword',
-        { oldPassword, newPassword },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      const employeeId = window.localStorage.getItem("employeeId");
 
-      if (response.status === 200) {
-        setMessage("Password changed successfully");
-      } else {
-        setMessage("Failed to change password");
-      }
+      const response = await axios.put("http://localhost:3001/changePwd", {
+        employeeId,
+        currentPassword,
+        newPassword,
+      });
+
+      // Show success message
+      setMessage(response.data.message);
+      setMessageType("success");
+
+      setTimeout(() => {
+        navigate("/layout/dashboard"); // Redirect after successful change
+      }, 2000); // Redirect after 2 seconds
     } catch (error) {
-      console.error("Error changing password:", error.message);
-      setMessage("Error changing password");
+      console.error("Error changing password:", error);
+
+      // Show error message
+      if (error.response) {
+        setMessage(error.response?.data?.message);
+      } else {
+        setMessage("An error occurred while changing the password.");
+      }
+      setMessageType("error");
     }
   };
 
   return (
-   <div className="container-fluid">
-    <div className="row">
-     <div className="col-md-12">
-     <div className="d-flex justify-content-center align-items-center">
-      <div className="change-password-container my-5 px-4 py-4">
-        <h2>Change Password</h2>
-        {message && <p>{message}</p>}
-        <form onSubmit={handlePasswordChange}>
-          <div className="form-group">
-            <label htmlFor="oldPassword">Old Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="oldPassword"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              required
-            />
+    <div className="container-fluid">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="d-flex justify-content-center align-items-center">
+            <div className="change-password-container my-5 px-4 py-4">
+              <h2>Change Password</h2>
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="oldPassword">Old Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="oldPassword"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="newPassword">New Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="newPassword"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="btn btn-success mt-3">
+                  Reset Password
+                </button>
+              </form>
+              {message && (
+                <div
+                  style={{
+                    color: messageType === "success" ? "green" : "red",
+                    fontSize: "20px",
+                    fontWeight: "500",
+                    textAlign: "center",
+                  }}
+                >
+                  {message}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-success mt-3">
-            Reset Password
-          </button>
-        </form>
+        </div>
       </div>
     </div>
-     </div>
-    </div>
-
-   </div>
   );
 };
 

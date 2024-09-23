@@ -59,7 +59,7 @@ const EmpLogin = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email,password }),
       });
       const data = await response.json();
 
@@ -69,6 +69,9 @@ const EmpLogin = () => {
           // Store necessary employee data in local storage
           window.localStorage.setItem('employeeId', data.employee.employeeId);
           window.localStorage.setItem('email', data.employee.email);
+          window.localStorage.setItem('name', data.employee.name);
+                  window.localStorage.setItem('token',data.token)
+          console.log("login:",data, data.token)
 
           // Redirect to dashboard
           navigate("/layout/dashboard");
