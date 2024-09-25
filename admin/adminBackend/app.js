@@ -7,6 +7,7 @@ require("./adminDetails");
 require("./productschema");
 require("./empSchema");
 
+
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
 const Employee = mongoose.model("Employee");
@@ -232,14 +233,19 @@ app.post("/getEmployeeDetails", async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-
+    const token = jwt.sign({ employeeId:employee.employeeId }, "sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh", {
+      expiresIn: "2h",
+    });
     res.status(200).json({
       status: "ok",
+      token,
       employee: {
         email: employee.email,
         password: employee.password,
         employeeId: employee.employeeId,
         employeeName: employee.name,
+        password: employee.password, 
+        token:token
       },
     });
   } catch (error) {

@@ -32,7 +32,7 @@ const EmployeeDashboard = ({ filterText,userData }) => {
     const fetchAppliedProducts = async () => {
       try {
         const response = await axios.get(`http://localhost:3003/appliedProducts/${userData?.employeeId}`);
-        console.log(userData,"user")
+           console.log(userData,"user")
         if (response.status === 200) {
           setAppliedProducts(response.data);
         } else {
@@ -42,12 +42,13 @@ const EmployeeDashboard = ({ filterText,userData }) => {
         console.error('Error fetching applied products:', error);
       }
     };
-
-    const employeeId = window.localStorage.getItem('employeeId');
-    if (employeeId) {
+  
+    // Ensure userData and employeeId are available before fetching products
+    if (userData && userData.employeeId) {
       fetchAppliedProducts();
     }
-  }, []);
+  }, [userData]); // Only run when userData changes
+  
   useEffect(() => {
     const fetchProductNames = async () => {
       try {

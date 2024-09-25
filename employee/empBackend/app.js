@@ -6,7 +6,9 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("./userDetails");
 require("./productApply"); 
-const Employee = require('../../admin/adminBackend/empSchema'); 
+require("./empSchema");
+const Employee = mongoose.model("Employee");
+
 
 const User = mongoose.model("UserInfo");
 const ProductApplication = mongoose.model("ProductApplication");
@@ -210,7 +212,37 @@ app.put("/updateProduct/:id", canEditOrDelete, async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
-// app.put('/appliedProducts/:id', async (req, res) => {
+
+
+app.post("/getEmployeeDetails", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const employee = await Employee.findOne({ email });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    const token = jwt.sign({ employeeId:employee.employeeId }, "sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh", {
+      expiresIn: "2h",
+    });
+    res.status(200).json({
+      status: "ok",
+      token,
+      employee: {
+        email: employee.email,
+        password: employee.password,
+        employeeId: employee.employeeId,
+        employeeName: employee.name,
+        password: employee.password, 
+        token:token
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
 //   try {
 //     const productId = req.params.id;
 //     const newStatus = req.body.status;
