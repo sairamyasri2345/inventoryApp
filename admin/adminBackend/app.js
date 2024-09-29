@@ -248,9 +248,10 @@ app.get("/employeeData", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
 app.post("/getEmployeeDetails", async (req, res) => {
-  const { email } = req.body;
+  const { email,password } = req.body;
 
   try {
     const employee = await Employee.findOne({ email });
@@ -258,7 +259,12 @@ app.post("/getEmployeeDetails", async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-    const token = jwt.sign({ employeeId:employee.employeeId }, "sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh", {
+    const isPasswordValid = await bcrypt.compare(password, employee.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign({ employeeId:employee.employeeId }, emp_secret, {
       expiresIn: "2h",
     });
     res.status(200).json({
@@ -266,7 +272,6 @@ app.post("/getEmployeeDetails", async (req, res) => {
       token,
       employee: {
         email: employee.email,
-        password: employee.password,
         employeeId: employee.employeeId,
         employeeName: employee.name,
         token:token
@@ -277,12 +282,36 @@ app.post("/getEmployeeDetails", async (req, res) => {
   }
 });
 
+// app.put('/changePwd', async (req, res) => {
+//   const { employeeId, newPassword } = req.body;
+  
+//   try {
+//     const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
+    
+//     if (!employee) {
+//       return res.status(404).json({ message: 'Employee not found' });
+//     }
+
+//     res.status(200).json({ message: 'Password updated successfully' });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error });
+//   }
+// });
+
+const saltRounds = 10;
 app.put('/changePwd', async (req, res) => {
   const { employeeId, newPassword } = req.body;
-  
+
   try {
-    const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
-    
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    const employee = await Employee.findOneAndUpdate(
+      { employeeId },
+      { password: hashedPassword },
+      { new: true }
+    );
+
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
@@ -292,8 +321,6 @@ app.put('/changePwd', async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
-
-
 
 const PORT = 3001;
 

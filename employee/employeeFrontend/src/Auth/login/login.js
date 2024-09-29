@@ -65,7 +65,7 @@ const EmpLogin = () => {
 
       if (data.status === 'ok') {
         // Check if the entered password matches the one stored in the admin database
-        if (data.employee.password === password) {
+        // if (data.employee.password === password) {
           // Store necessary employee data in local storage
           window.localStorage.setItem('employeeId', data.employee.employeeId);
           window.localStorage.setItem('email', data.employee.email);
@@ -76,9 +76,9 @@ const EmpLogin = () => {
 
           // Redirect to dashboard
           navigate("/layout/dashboard");
-        } else {
-          alert("Incorrect password. Please try again.");
-        }
+        // } else {
+        //   alert("Incorrect password. Please try again.");
+        // }
       } else {
         alert("Employee not found. Please check your email.");
       }

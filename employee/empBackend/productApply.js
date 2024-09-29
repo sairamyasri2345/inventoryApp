@@ -10,7 +10,7 @@ const ProductApplicationSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 5500 
+   
   }
 });
 
