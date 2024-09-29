@@ -16,23 +16,11 @@ const EmployeeDashboard = ({ filterText, userData }) => {
 
   const TIME_LIMIT = 25 * 60 * 1000;
 
-  // const fetchAppliedProducts = async () => {
-  //   const employeeId = window.localStorage.getItem('employeeId');
-  //   try {
-  //     const response = await axios.get(`http://localhost:3003/appliedProducts/${employeeId}`);
-  //     if (response.status === 200) {
-  //       setAppliedProducts(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching applied products:", error);
-  //   }
-  // };
-
   const fetchAppliedProducts = async () => {
     const employeeId = window.localStorage.getItem("employeeId");
     try {
       const response = await axios.get(
-        `https://employeeapp-shov.onrender.com/appliedProducts/${employeeId}`
+        `http://localhost:3003/appliedProducts/${employeeId}`
       );
       if (response.status === 200) {
         console.log("Fetched Products:", response.data); // Log the fetched products
@@ -50,7 +38,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
-        const response = await axios.get("https://adminapps.onrender.com/products");
+        const response = await axios.get("http://localhost:3001/products");
         console.log("Response data:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
           setProductNames(
@@ -98,78 +86,36 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   const handleApplyProduct = async (formData) => {
     const employeeId = window.localStorage.getItem("employeeId");
 
+    // Include employeeId in the formData if necessary
     const updatedFormData = {
       ...formData,
-      employeeId: employeeId,
+      employeeId: employeeId, // Add employeeId to formData
     };
 
     try {
       let response;
       if (editMode) {
         response = await axios.put(
-          `http://localhost:3003/updateProduct/${currentProduct._id}`,
+          `https://inventory-app-employee.onrender.com/updateProduct/${currentProduct._id}`,
           updatedFormData
         );
-        setAppliedProducts((prev) =>
-          prev.map((product) =>
+        setAppliedProducts(
+          appliedProducts.map((product) =>
             product._id === currentProduct._id ? response.data : product
           )
         );
       } else {
         response = await axios.post(
-          "http://localhost:3003/applyProduct",
+          "https://inventory-app-employee.onrender.com/applyProduct",
           updatedFormData
         );
-        // Check for duplicates before adding
-        setAppliedProducts(
-          (prev) =>
-            prev.some((product) => product._id === response.data._id)
-              ? prev // If it exists, don't add again
-              : [...prev, response.data] // Otherwise, add the new product
-        );
+        setAppliedProducts([...appliedProducts, response.data]);
       }
       handleClose();
     } catch (error) {
       console.error("Error applying product:", error);
     }
   };
-
-  // const handleApplyProduct = async (formData) => {
-  //   const employeeId = window.localStorage.getItem('employeeId');
-
-  //   // Include employeeId in the formData if necessary
-  //   const updatedFormData = {
-  //     ...formData,
-  //     employeeId: employeeId // Add employeeId to formData
-  //   };
-
-  //   try {
-  //     let response;
-  //     if (editMode) {
-  //       response = await axios.put(
-  //         `http://localhost:3003/updateProduct/${currentProduct._id}`,
-  //         updatedFormData
-  //       );
-  //       setAppliedProducts(
-  //         appliedProducts.map((product) =>
-  //           product._id === currentProduct._id ? response.data : product
-  //         )
-  //       );
-  //       response = await axios.put(`http://localhost:3003/updateProduct/${currentProduct._id}`, updatedFormData);
-  //       setAppliedProducts(appliedProducts.map(product => product._id === currentProduct._id ? response.data : product));
-  //     } else {
-  //       response = await axios.post(
-  //         "http://localhost:3003/applyProduct",
-  //         updatedFormData
-  //       );
-  //       response = await axios.post('http://localhost:3003/applyProduct', updatedFormData);
-  //       setAppliedProducts([...appliedProducts, response.data]);
-  //     }
-  //     handleClose();
-  //   } catch (error) {
-  //     console.error('Error applying product:', error);
-  //   }
-  // };
 
   const handleEdit = (product) => {
     const timeSinceApplied = new Date() - new Date(product.date);
@@ -197,7 +143,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
     }
 
     try {
-      await axios.delete(`https://employeeapp-shov.onrender.com/deleteProduct/${id}`);
+      await axios.delete(`http://localhost:3003/deleteProduct/${id}`);
       setAppliedProducts(
         appliedProducts.filter((product) => product._id !== id)
       );
