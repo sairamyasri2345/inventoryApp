@@ -204,17 +204,42 @@ app.get("/products", async (req, res) => {
 });
 
 //add employee
-app.post("/addEmployees", async (req, res) => {
+app.post('/addEmployees', async (req, res) => {
+  const { email, password, employeeId, name } = req.body;
+  const encryptedPassword = await bcrypt.hash(password, 10);
+
+  const newEmployee = new Employee({ email, password: encryptedPassword, employeeId, name });
+  await newEmployee.save();
+
+  res.status(200).json({ message: 'Employee added' });
+})
+app.post('/validateEmployee', async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const newEmployee = await Employee.create({
-      ...req.body,
+    const employee = await Employee.findOne({ email });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, employee.password);
+    if (!isPasswordValid) {
+      return res.status(403).json({ message: "Invalid credentials" });
+    }
+
+    res.status(200).json({
+      employee: {
+        email: employee.email,
+        password: employee.password,
+        employeeId: employee.employeeId,
+        employeeName: employee.name,
+      
+      },
     });
-    res.status(200).json(newEmployee);
   } catch (error) {
-    res.status(500).json({ message: "Error saving employee" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-
 app.get("/employeeData", async (req, res) => {
   try {
     const employees = await Employee.find();
@@ -244,7 +269,6 @@ app.post("/getEmployeeDetails", async (req, res) => {
         password: employee.password,
         employeeId: employee.employeeId,
         employeeName: employee.name,
-        password: employee.password, 
         token:token
       },
     });

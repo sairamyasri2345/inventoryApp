@@ -76,7 +76,7 @@ const EmpProduct = ({
     const formData = {
       productName,
       employeeId,
-      employeeName: userData.uname,
+      employeeName: userData.employeeName,
       quantity: parsedQuantity,
       startDate,
     };

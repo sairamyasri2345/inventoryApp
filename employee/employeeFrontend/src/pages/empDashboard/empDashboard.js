@@ -18,37 +18,25 @@ const EmployeeDashboard = ({ filterText,userData }) => {
 
   
 
- 
-
-  useEffect(() => {
-    if (userData) {
-      setEmployeeId(userData.employeeId); 
-    }
-  }, [userData]);
 
 
-
-  useEffect(() => {
-    const fetchAppliedProducts = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3003/appliedProducts/${userData?.employeeId}`);
-           console.log(userData,"user")
-        if (response.status === 200) {
-          setAppliedProducts(response.data);
-        } else {
-          console.error('Error fetching applied products:', response.data.error);
-        }
-      } catch (error) {
-        console.error('Error fetching applied products:', error);
+  const fetchAppliedProducts = async () => {
+    const employeeId = window.localStorage.getItem('employeeId');
+    try {
+      const response = await axios.get(`http://localhost:3003/appliedProducts/${employeeId}`);
+      if (response.status === 200) {
+        setAppliedProducts(response.data);
       }
-    };
-  
-    // Ensure userData and employeeId are available before fetching products
-    if (userData && userData.employeeId) {
-      fetchAppliedProducts();
+    } catch (error) {
+      console.error("Error fetching applied products:", error);
     }
-  }, [userData]); // Only run when userData changes
-  
+  };
+
+  useEffect(() => {
+    fetchAppliedProducts();
+  }, []);
+
+
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
@@ -89,41 +77,28 @@ const EmployeeDashboard = ({ filterText,userData }) => {
   const handleShow = () => setShow(true);
 
   const handleApplyProduct = async (formData) => {
+    const employeeId = window.localStorage.getItem('employeeId');
+    
+    // Include employeeId in the formData if necessary
+    const updatedFormData = {
+      ...formData,
+      employeeId: employeeId // Add employeeId to formData
+    };
+  
     try {
-      let employeeId = localStorage.getItem('employeeId');
-      let employeeName = localStorage.getItem('employeeName');
-  
-      if (!employeeId || !employeeName) {
-        if (userData) {
-          employeeId = userData.employeeId;
-          employeeName = userData.employeeName;
-        } else {
-          console.error('Employee details not found in localStorage or userData.');
-          return;
-        }
-      }
-  
-      const productData = {
-        ...formData,
-        employeeId,
-        employeeName,
-      };
-  
       let response;
       if (editMode) {
-        response = await axios.put(`http://localhost:3003/updateProduct/${currentProduct._id}`, productData);
+        response = await axios.put(`https://inventory-app-employee.onrender.com/updateProduct/${currentProduct._id}`, updatedFormData);
         setAppliedProducts(appliedProducts.map(product => product._id === currentProduct._id ? response.data : product));
       } else {
-        response = await axios.post('http://localhost:3003/applyProduct', productData);
+        response = await axios.post('https://inventory-app-employee.onrender.com/applyProduct', updatedFormData);
         setAppliedProducts([...appliedProducts, response.data]);
       }
-  
       handleClose();
     } catch (error) {
       console.error('Error applying product:', error);
     }
   };
-  
   
   const handleEdit = (product) => {
     const timeSinceApplied = new Date() - new Date(product.date);

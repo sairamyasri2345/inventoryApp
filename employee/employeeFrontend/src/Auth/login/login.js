@@ -69,9 +69,10 @@ const EmpLogin = () => {
           // Store necessary employee data in local storage
           window.localStorage.setItem('employeeId', data.employee.employeeId);
           window.localStorage.setItem('email', data.employee.email);
-          window.localStorage.setItem('name', data.employee.name);
-                  window.localStorage.setItem('token',data.token)
+          window.localStorage.setItem('name', data.employee.employeeName);
+              window.localStorage.setItem('token',data.token)
           console.log("login:",data, data.token)
+          console.log(data.employee.employeeName,"name")
 
           // Redirect to dashboard
           navigate("/layout/dashboard");

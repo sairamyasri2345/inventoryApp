@@ -40,6 +40,7 @@ const Layout = () => {
     const fetchUserData = async () => {
       try {
         const token = window.localStorage.getItem("token");
+        console.log(token,"token")
         const employeeEmail = window.localStorage.getItem("email");
     
         const response = await axios.post("http://localhost:3001/getEmployeeDetails", { 
