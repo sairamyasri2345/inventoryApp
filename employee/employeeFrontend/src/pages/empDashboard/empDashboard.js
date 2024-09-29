@@ -124,14 +124,37 @@ const EmployeeDashboard = ({ filterText,userData }) => {
   const handleShow = () => setShow(true);
 
   const handleApplyProduct = async (formData) => {
+    const employeeId = window.localStorage.getItem("employeeId");
+
+    const updatedFormData = {
+      ...formData,
+      employeeId: employeeId,
+    };
+
     try {
       let response;
       if (editMode) {
-        response = await axios.put(`http://localhost:3003/updateProduct/${currentProduct._id}`, formData);
-        setAppliedProducts(appliedProducts.map(product => product._id === currentProduct._id ? response.data : product));
+        response = await axios.put(
+          `http://localhost:3003/updateProduct/${currentProduct._id}`,
+          updatedFormData
+        );
+        setAppliedProducts((prev) =>
+          prev.map((product) =>
+            product._id === currentProduct._id ? response.data : product
+          )
+        );
       } else {
-        response = await axios.post('http://localhost:3003/applyProduct', formData);
-        setAppliedProducts([...appliedProducts, response.data]);
+        response = await axios.post(
+          "http://localhost:3003/applyProduct",
+          updatedFormData
+        );
+        // Check for duplicates before adding
+        setAppliedProducts(
+          (prev) =>
+            prev.some((product) => product._id === response.data._id)
+              ? prev // If it exists, don't add again
+              : [...prev, response.data] // Otherwise, add the new product
+        );
       }
       handleClose();
     } catch (error) {
@@ -198,9 +221,11 @@ const EmployeeDashboard = ({ filterText,userData }) => {
     }
   
     try {
-      await axios.delete(`http://localhost:3003/deleteProduct/${id}`);
-      setAppliedProducts(appliedProducts.filter(product => product._id !== id));
-      setTimeError(''); // Clear error if applicable
+      await axios.delete(`https://employeeapp-shov.onrender.com/deleteProduct/${id}`);
+      setAppliedProducts(
+        appliedProducts.filter((product) => product._id !== id)
+      );
+      setTimeError(""); // Clear error if applicable
     } catch (error) {
       console.error('Error deleting product:', error);
     }
