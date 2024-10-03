@@ -35,11 +35,12 @@ const EmpProduct = ({
       // Fetch available quantity for the selected product
       const fetchAvailableQuantity = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/products`);
+          const response = await axios.get(`https://adminapps.onrender.com
+ /products`);
           const products = response.data.data;
           const product = products.find(p => p.productName === productName);
           if (product) {
-            const approvedCountsResponse = await axios.get('http://localhost:3003/appliedProducts');
+            const approvedCountsResponse = await axios.get('https://employeeapp-shov.onrender.com/appliedProducts');
             const approvedCounts = approvedCountsResponse.data.reduce((acc, item) => {
               if (item.status === "Approved" && item.productName === productName) {
                 acc += item.quantity;

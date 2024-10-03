@@ -43,7 +43,7 @@ const Layout = () => {
         console.log(token,"token")
         const employeeEmail = window.localStorage.getItem("email");
     
-        const response = await axios.post("http://localhost:3001/getEmployeeDetails", { 
+        const response = await axios.post("https://adminapps.onrender.com/getEmployeeDetails", { 
           email: employeeEmail 
         }, {
           headers: {

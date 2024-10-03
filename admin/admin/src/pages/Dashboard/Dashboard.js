@@ -8,7 +8,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:3001/products');
+        const response = await fetch('https://adminapps.onrender.com/products');
         const result = await response.json();
         if (result && Array.isArray(result.data)) {
           setProducts(result.data);
@@ -22,7 +22,7 @@ const Dashboard = () => {
 
     const fetchApprovedCounts = async () => {
       try {
-        const response = await fetch('http://localhost:3003/appliedProducts');
+        const response = await fetch('https://employeeapp-shov.onrender.com/appliedProducts');
         const data = await response.json();
         const counts = data.reduce((acc, item) => {
           if (item.status === "Approved") {
