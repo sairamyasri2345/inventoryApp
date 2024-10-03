@@ -54,7 +54,7 @@ const EmpLogin = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:3001/getEmployeeDetails", {
+      const response = await fetch("https://adminapps.onrender.com/getEmployeeDetails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

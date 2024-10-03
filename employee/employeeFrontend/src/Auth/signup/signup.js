@@ -49,7 +49,7 @@ const EmpSignUp = () => {
 
     console.log("Submitting:", { uname, email, password });
 
-    fetch("http://localhost:3003/empSignup", {
+    fetch("https://employeeapp-shov.onrender.com/empSignup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
