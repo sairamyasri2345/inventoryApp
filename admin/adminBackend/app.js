@@ -204,15 +204,42 @@ app.get("/products", async (req, res) => {
 });
 
 //add employee
+// app.post('/addEmployees', async (req, res) => {
+//   try {
+//     const { name, employeeId, phoneNumber, designation, department, email, password} = req.body;
+//     const hashedPassword = await bcrypt.hash(initialPassword, 10);
+//     const newEmployee = await Employee.create({name,
+//       employeeId,
+//       phoneNumber,
+//       designation,
+//       department,
+//       email,
+//       initialPassword,  
+//       password:hashedPassword
+//   });
+//     res.status(200).json(newEmployee);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error saving employee' });
+//   }
+// });
 app.post('/addEmployees', async (req, res) => {
-  const { email, password, employeeId, name } = req.body;
-  const encryptedPassword = await bcrypt.hash(password, 10);
+  try {
+    const newEmployee = await Employee.create(req.body);
+    res.status(200).json(newEmployee);
+  } catch (error) {
+    res.status(500).json({ message: 'Error saving employee' });
+  }
+});
 
-  const newEmployee = new Employee({ email, password: encryptedPassword, employeeId, name });
-  await newEmployee.save();
 
-  res.status(200).json({ message: 'Employee added' });
-})
+app.get('/employeeData', async (req, res) => {
+  try {
+    const employees = await Employee.find();
+    res.status(200).json(employees);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 app.post('/validateEmployee', async (req, res) => {
   const { email, password } = req.body;
 
@@ -240,14 +267,14 @@ app.post('/validateEmployee', async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-app.get("/employeeData", async (req, res) => {
-  try {
-    const employees = await Employee.find();
-    res.status(200).json(employees);
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
+// app.get("/employeeData", async (req, res) => {
+//   try {
+//     const employees = await Employee.find();
+//     res.status(200).json(employees);
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
 app.post("/getEmployeeDetails", async (req, res) => {
@@ -280,17 +307,21 @@ app.post("/getEmployeeDetails", async (req, res) => {
 
 app.put('/changePwd', async (req, res) => {
   const { employeeId, newPassword } = req.body;
-  
   try {
-    const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
-    
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
+    const employee = await Employee.findOneAndUpdate(
+      { employeeId },
+      { password: hashedPassword },  // Only update the hashed password
+      { new: true }
+    );
+
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
 
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'Error updating password', error });
   }
 });
 
