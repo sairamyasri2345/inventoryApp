@@ -20,7 +20,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
     const employeeId = window.localStorage.getItem("employeeId");
     try {
       const response = await axios.get(
-        `https://employeeapp-shov.onrender.com/appliedProducts/${employeeId}`
+        `http://localhost:3003/appliedProducts/${employeeId}`
       );
       if (response.status === 200) {
         setAppliedProducts(response.data);
@@ -37,7 +37,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
-        const response = await axios.get("https://adminapps.onrender.com/products");
+        const response = await axios.get("http://localhost:3001/products");
         console.log("Response data:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
           setProductNames(
@@ -96,7 +96,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
       let response;
       if (editMode) {
         response = await axios.put(
-          `https://localhost:3003/updateProduct/${currentProduct._id}`,
+          `http://localhost:3003/updateProduct/${currentProduct._id}`,
           updatedFormData
         );
         setAppliedProducts(
@@ -106,7 +106,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
         );
       } else {
         response = await axios.post(
-          "https://localhost:3003/applyProduct",
+          "http://localhost:3003/applyProduct",
           updatedFormData
         );
         setAppliedProducts([...appliedProducts, response.data]);
@@ -143,7 +143,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
     }
 
     try {
-      await axios.delete(`https://employeeapp-shov.onrender.com/deleteProduct/${id}`);
+      await axios.delete(`http://localhost:3003/deleteProduct/${id}`);
       setAppliedProducts(
         appliedProducts.filter((product) => product._id !== id)
       );

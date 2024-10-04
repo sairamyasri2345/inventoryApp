@@ -55,7 +55,7 @@ const EmpLogin = () => {
       return;
     }
 
-    fetch("https://adminapps.onrender.com/empLogin", {
+    fetch("http://localhost:3001/empLogin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

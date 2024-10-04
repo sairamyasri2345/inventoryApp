@@ -15,7 +15,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "https://adminapps.onrender.com/products"
+          "http://localhost:3001/products"
         );
         const data = await response.json();
         console.log("Fetched Products Data:", data);
@@ -33,7 +33,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
     const fetchApprovedCounts = async () => {
       try {
         const response = await fetch(
-          "https://employeeapp-shov.onrender.com/appliedProducts"
+          "http://localhost:3003/appliedProducts"
         );
         const data = await response.json();
         const counts = data.reduce((acc, item) => {
@@ -66,8 +66,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
       const productId = products[editIndex]._id;
       try {
         const response = await fetch(
-          `https://adminapps.onrender.com
- /products/${productId}`,
+          `http://localhost:3001/products/${productId}`,
           {
             method: "PUT",
             headers: {
@@ -97,7 +96,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
       // Add new product
       try {
         const response = await fetch(
-          "https://adminapps.onrender.com/products",
+          "http://localhost:3001/products",
           {
             method: "POST",
             headers: {
@@ -136,8 +135,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
     const deletedProduct = products[index];
     try {
       const response = await fetch(
-        `https://adminapps.onrender.com
- /products/${productId}`,
+        `http://localhost:3001/products/${productId}`,
         {
           method: "DELETE",
         }
