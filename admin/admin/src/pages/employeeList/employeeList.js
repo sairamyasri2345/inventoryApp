@@ -143,6 +143,7 @@ const EmployeeList = ({ darkMode }) => {
                           <td>{emp.employeeId}</td>
                           <td>{emp.email}</td>
                           <td>{emp.password}</td>
+                        
                           <td>{emp.phoneNumber}</td>
                           <td>{emp.designation}</td>
                           <td>{emp.department}</td>
