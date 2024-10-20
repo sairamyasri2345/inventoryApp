@@ -38,7 +38,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
-        const response = await axios.get("https://adminapps.onrender.com/products");
+        const response = await axios.get("http://localhost:3001/products");
         console.log("Response data:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
           setProductNames(

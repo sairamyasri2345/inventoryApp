@@ -35,7 +35,7 @@ const EmpProduct = ({
       // Fetch available quantity for the selected product
       const fetchAvailableQuantity = async () => {
         try {
-          const response = await axios.get(`https://adminapps.onrender.com
+          const response = await axios.get(`http://localhost:3001
  /products`);
           const products = response.data.data;
           const product = products.find(p => p.productName === productName);
