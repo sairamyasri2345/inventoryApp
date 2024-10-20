@@ -19,7 +19,7 @@ const ChangePassword = (darkMode) => {
 
     try {
       const response = await axios.put(
-        'http://localhost:3001/changePassword',
+        'https://adminapps.onrender.com/changePassword',
         { oldPassword, newPassword },
         {
           headers: {
