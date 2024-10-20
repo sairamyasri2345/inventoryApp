@@ -61,21 +61,21 @@ const EmpLogin = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+   
       if (response.status === 401) {
-        alert('Invalid credentials. Please try again.');
+        alert("Invalid credentials. Please try again.");
         return;
       }
-
+  
       if (response.status === 404) {
-        alert('Employee not found. Please check your email.');
+        alert("Employee not found. Please check your email.");
         return;
       }
-
+  
       if (!response.ok) {
-        throw new Error('An unexpected error occurred');
+        throw new Error("An unexpected error occurred");
       }
-
+  
       const data = await response.json();
 
       if (data.status === 'ok') {

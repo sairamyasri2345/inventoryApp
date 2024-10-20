@@ -22,7 +22,7 @@ const Dashboard = () => {
 
     const fetchApprovedCounts = async () => {
       try {
-        const response = await fetch('https://employeeapp-shov.onrender.com/appliedProducts');
+        const response = await fetch('http://localhost:3003/appliedProducts');
         const data = await response.json();
         const counts = data.reduce((acc, item) => {
           if (item.status === "Approved") {

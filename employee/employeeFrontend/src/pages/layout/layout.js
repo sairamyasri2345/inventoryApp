@@ -16,6 +16,7 @@ const Layout = () => {
   const appContainerRef = useRef(null);
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   const toggleDarkMode = () => {
     setDarkMode((prevMode) => !prevMode);
   };
@@ -43,7 +44,7 @@ const Layout = () => {
         const employeeEmail = window.localStorage.getItem("email");
 
         const response = await axios.post(
-          "https://adminapps.onrender.com/getEmployeeDetails",
+          "http://localhost:3001/getEmployeeDetails",
 
           { email: employeeEmail },
           {
@@ -77,7 +78,7 @@ const Layout = () => {
 
   const handleFilterChange = (text) => {
     setFilterText(text);
-  }
+  };
 
   const handleAddProduct = (newProduct) => {
     setProducts([...products, newProduct]);
@@ -102,15 +103,11 @@ const Layout = () => {
   return (
     <div
       ref={appContainerRef}
-      className={`container-fluid inventory-container ${
-        darkMode ? "dark-mode" : ""
-      }`}
+      className={`container-fluid inventory-container ${darkMode ? "dark-mode" : ""}`}
     >
-      <div className="row ">
+      <div className="row">
         <div
-          className={`col-md-2 p-0 m-0 sidebar-col ${
-            sidebarCollapsed ? "icons-only" : ""
-          }`}
+          className={`col-md-2 p-0 m-0 sidebar-col ${sidebarCollapsed ? "icons-only" : ""}`}
         >
           <Sidebar darkMode={darkMode} sidebarCollapsed={sidebarCollapsed} />
         </div>
@@ -140,11 +137,7 @@ const Layout = () => {
                   />
                 }
               />
-              <Route
-                path="/orders"
-                element={<Order filterText={filterText} />}
-              />
-
+              <Route path="/orders" element={<Order filterText={filterText} />} />
               <Route path="/changepassword" element={<ChangePassword />} />
             </Routes>
           </div>
