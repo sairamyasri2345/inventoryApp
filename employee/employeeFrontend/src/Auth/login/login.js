@@ -49,46 +49,54 @@ const EmpLogin = () => {
     return valid;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     event.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
-    fetch("http://localhost:3003/empLogin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "ok") {
-          window.localStorage.setItem("token", data.data.token);
-          window.localStorage.setItem('employeeId', data.data.employeeId);
-          window.localStorage.setItem("loggedIn", true);
-          console.log('Employee ID stored:', data.data.employeeId);
+    if (!validateForm()) return;
 
-          fetch("http://localhost:3003/layout", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ token: data.data.token }),
-          })
-            .then((res) => res.json())
-            .then((userData) => {
-              if (userData.status === "ok") {
-                window.localStorage.setItem("userData", JSON.stringify(userData.data));
-                navigate("/layout/dashboard");
-              }
-            });
-        } else {
-          alert("Login error");
-        }
+    try {
+      const response = await fetch('http://localhost:3001/getEmployeeDetails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
-  };
+
+      if (response.status === 401) {
+        alert('Invalid credentials. Please try again.');
+        return;
+      }
+
+      if (response.status === 404) {
+        alert('Employee not found. Please check your email.');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('An unexpected error occurred');
+      }
+
+      const data = await response.json();
+
+      if (data.status === 'ok') {
+        // Store necessary employee data in local storage
+        window.localStorage.setItem('employeeId', data.employee.employeeId);
+        window.localStorage.setItem('email', data.employee.email);
+        window.localStorage.setItem('name', data.employee.employeeName);
+        window.localStorage.setItem('token', data.token);
+
+        // Redirect to dashboard
+        navigate('/layout/dashboard');
+      } else {
+        alert('Incorrect password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('An error occurred while logging in. Please try again.');
+    }
+  
+     
+  }
 
   return (
     <div className="container-fluid signup-cont d-flex align-items-center justify-content-center vh-100 p-5">

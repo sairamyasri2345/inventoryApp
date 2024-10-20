@@ -11,7 +11,6 @@ const ChangePassword = () => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-
     if (!token) {
       setMessage("User not authenticated");
       return;
@@ -19,7 +18,7 @@ const ChangePassword = () => {
 
     try {
       const response = await axios.put(
-        'http://localhost:3003/changePassword',
+        'http://localhost:3001/chaangePwd',
         { oldPassword, newPassword },
         {
           headers: {

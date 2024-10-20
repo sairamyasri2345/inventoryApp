@@ -72,7 +72,7 @@ const EmployeeList = ({ darkMode }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/employeeData");
+        const response = await axios.get("https://adminapps.onrender.com/employeeData");
         console.log("Fetched employee data:", response.data); // Log the fetched data
         setEmployeeList(response.data); // Update state
       } catch (error) {

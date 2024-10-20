@@ -5,6 +5,7 @@ import Dashboard from "../empDashboard/empDashboard";
 import Order from "../orderList/orderList";
 import EmpNavbar from "../navbar/navbar";
 import "./layout.css";
+import axios from "axios";
 import ChangePassword from "../changePassword/changePassword";
 
 
@@ -39,17 +40,29 @@ const Layout = () => {
     const fetchUserData = async () => {
       try {
         const token = window.localStorage.getItem("token");
-        const employeeId=window.localStorage.getItem("employeeId")
-        const response = await fetch("http://localhost:3003/layout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ token , employeeId}),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+        const employeeEmail = window.localStorage.getItem("email");
+
+        const response = await axios.post(
+          "https://adminapps.onrender.com/getEmployeeDetails",
+
+          { email: employeeEmail },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.status === "ok") {
+          console.log("User data fetched:", response.data.employee);
+          setUserData(response.data.employee);
+        } else if (response.data.error === "jwt expired") {
+          console.error("Token expired. Please log in again.");
+          // Handle the expired token: redirect to login, clear localStorage, etc.
+          window.localStorage.removeItem("token");
+          window.location.href = "/login"; // Redirect to login page
+        } else {
+          throw new Error(response.data.message);
         }
         const data = await response.json();
         console.log("User data fetched:", data);
