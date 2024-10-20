@@ -38,7 +38,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   useEffect(() => {
     const fetchProductNames = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/products");
+        const response = await axios.get("https://adminapps.onrender.com/products");
         console.log("Response data:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
           setProductNames(
@@ -96,7 +96,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
       let response;
       if (editMode) {
         response = await axios.put(
-          `https://inventory-app-employee.onrender.com/updateProduct/${currentProduct._id}`,
+          `http://localhost:3003/updateProduct/${currentProduct._id}`,
           updatedFormData
         );
         setAppliedProducts(
@@ -106,7 +106,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
         );
       } else {
         response = await axios.post(
-          "https://inventory-app-employee.onrender.com/applyProduct",
+          "http://localhost:3003/applyProduct",
           updatedFormData
         );
         setAppliedProducts([...appliedProducts, response.data]);

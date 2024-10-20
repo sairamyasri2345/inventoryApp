@@ -40,7 +40,7 @@ const EmpProduct = ({
           const products = response.data.data;
           const product = products.find(p => p.productName === productName);
           if (product) {
-            const approvedCountsResponse = await axios.get('https://employeeapp-shov.onrender.com/appliedProducts');
+            const approvedCountsResponse = await axios.get('http://localhost:3003/appliedProducts');
             const approvedCounts = approvedCountsResponse.data.reduce((acc, item) => {
               if (item.status === "Approved" && item.productName === productName) {
                 acc += item.quantity;
