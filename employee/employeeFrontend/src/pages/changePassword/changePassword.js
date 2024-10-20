@@ -17,7 +17,7 @@ const ChangePassword = () => {
     try {
       const employeeId = window.localStorage.getItem("employeeId");
 
-      const response = await axios.put("https://adminapps.onrender.com/changePwd", {
+      const response = await axios.put("http://localhost:3001/changePwd", {
         employeeId,
         currentPassword,
         newPassword,
