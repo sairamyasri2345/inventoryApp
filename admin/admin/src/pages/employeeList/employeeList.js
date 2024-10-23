@@ -89,23 +89,37 @@ const EmployeeList = ({ darkMode }) => {
   };
 
   // Save employee data
-  const handleSave = async () => {
-    if (!validateForm()) return; // Validate before saving
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/addEmployees",
-        employee
-      );
-      console.log("Employee saved:", response.data);
-      if (response.data) {
-        setEmployeeList((prevList) => [...prevList, response.data]);
-      }
-      handleCloseModal();
-    } catch (error) {
-      console.error("Error saving employee:", error);
+const handleSave = async () => {
+  if (!validateForm()) return; // Validate before saving
+
+  try {
+    const response = await axios.post(
+      "http://localhost:3001/addEmployees",
+      employee
+    );
+    console.log("Employee saved:", response.data);
+
+    // If the employee is saved, update the employee list and close the modal
+    if (response.data) {
+      setEmployeeList((prevList) => [...prevList, response.data]);
     }
-  };
+    handleCloseModal();
+  } catch (error) {
+    // Handle validation errors from the backend
+    if (error.response && error.response.status === 400) {
+      setErrors({ form: error.response.data.message });
+    } else if (error.response && error.response.status === 409) {
+      // Handle duplicate employee ID or email
+      setErrors({ form: "Employee ID or Email already taken." });
+    } else {
+      console.error("Error saving employee:", error);
+      setErrors({ form: "An error occurred while saving the employee." });
+    }
+  }
+};
+
+
   const handleDelete = async (id) => {
     console.log(employeeList); // Check if _id is present
 
@@ -118,7 +132,7 @@ const EmployeeList = ({ darkMode }) => {
       // Check response status (optional but good for debugging)
       if (response.status === 200) {
         // Update employeeList state to remove the deleted employee
-        setEmployeeList((prevList) => prevList.filter(emp => emp._id !== id));
+        setEmployeeList((prevList) => prevList.filter((emp) => emp._id !== id));
         alert("Employee deleted successfully."); // Optional success message
       }
     } catch (error) {
@@ -133,8 +147,6 @@ const EmployeeList = ({ darkMode }) => {
       );
     }
   };
-  
-
 
   // Open modal
   const openModal = () => {
