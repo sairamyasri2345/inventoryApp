@@ -66,8 +66,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
       const productId = products[editIndex]._id;
       try {
         const response = await fetch(
-          `http://localhost:3001
- /products/${productId}`,
+          `http://localhost:3001/products/${productId}`,
           {
             method: "PUT",
             headers: {
@@ -136,8 +135,7 @@ const Product = ({ onAddProduct, filterText, darkMode }) => {
     const deletedProduct = products[index];
     try {
       const response = await fetch(
-        `http://localhost:3001
- /products/${productId}`,
+        `http://localhost:3001/products/${productId}`,
         {
           method: "DELETE",
         }

@@ -172,6 +172,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   // };
 
   const handleEdit = (product) => {
+
     const timeSinceApplied = new Date() - new Date(product.date);
     if (timeSinceApplied > TIME_LIMIT) {
       setTimeError(
