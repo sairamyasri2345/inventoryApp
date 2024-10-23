@@ -222,14 +222,31 @@ app.get("/products", async (req, res) => {
 //     res.status(500).json({ message: 'Error saving employee' });
 //   }
 // });
-app.post('/addEmployees', async (req, res) => {
+
+app.post("/addEmployees", async (req, res) => {
   try {
-    const newEmployee = await Employee.create(req.body);
-    res.status(200).json(newEmployee);
+    const { employeeId, email } = req.body;
+
+    // Check if employee ID or email already exists
+    const existingEmployee = await Employee.findOne({
+      $or: [{ employeeId }, { email }]
+    });
+
+    if (existingEmployee) {
+      return res.status(409).json({ message: "Employee ID or Email already taken." });
+    }
+
+    // Proceed with saving the new employee if no conflicts
+    const newEmployee = new Employee(req.body);
+    await newEmployee.save();
+
+    return res.status(201).json(newEmployee);
   } catch (error) {
-    res.status(500).json({ message: 'Error saving employee' });
+    console.error("Error saving employee:", error);
+    return res.status(500).json({ message: "Server error occurred." });
   }
 });
+
 
 
 app.get('/employeeData', async (req, res) => {
@@ -240,47 +257,8 @@ app.get('/employeeData', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-app.delete("/deleteEmployee/:id", async (req, res) => {
-  const employeeId = req.params.id;
 
-  try {
-    const result = await Employee.findByIdAndDelete(employeeId);
-    if (!result) {
-      return res.status(404).json({ message: "Employee not found" });
-    }
-    res.status(200).json({ message: "Employee deleted successfully" });
-  } catch (error) {
-    console.error("Error while deleting employee:", error.message);
-    res.status(500).json({ message: "Error deleting employee" });
-  }
-});
-app.post('/validateEmployee', async (req, res) => {
-  const { email, password } = req.body;
 
-  try {
-    const employee = await Employee.findOne({ email });
-    if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, employee.password);
-    if (!isPasswordValid) {
-      return res.status(403).json({ message: "Invalid credentials" });
-    }
-
-    res.status(200).json({
-      employee: {
-        email: employee.email,
-        password: employee.password,
-        employeeId: employee.employeeId,
-        employeeName: employee.name,
-      
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
 // app.get("/employeeData", async (req, res) => {
 //   try {
 //     const employees = await Employee.find();
@@ -293,8 +271,6 @@ emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
 app.post("/getEmployeeDetails", async (req, res) => {
   const { email,password } = req.body;
-  console.log("Email:", email); // Log the incoming email
-  console.log("Password:", password); // Log the incoming password
 
   try {
     const employee = await Employee.findOne({ email });
@@ -303,12 +279,8 @@ app.post("/getEmployeeDetails", async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, employee.password);
-    console.log("Retrieved Employee:", employee); // Log employee details
-    console.log("Password Valid:", isPasswordValid); // Log password comparison result
-
 
     if (!isPasswordValid) {
-      console.log("Invalid credentials");
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign({ employeeId:employee.employeeId }, emp_secret, {
@@ -321,7 +293,7 @@ app.post("/getEmployeeDetails", async (req, res) => {
         email: employee.email,
         employeeId: employee.employeeId,
         employeeName: employee.name,
-     
+        token:token
       },
     });
   } catch (error) {
