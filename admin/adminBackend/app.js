@@ -240,6 +240,20 @@ app.get('/employeeData', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+app.delete("/deleteEmployee/:id", async (req, res) => {
+  const employeeId = req.params.id;
+
+  try {
+    const result = await Employee.findByIdAndDelete(employeeId);
+    if (!result) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.status(200).json({ message: "Employee deleted successfully" });
+  } catch (error) {
+    console.error("Error while deleting employee:", error.message);
+    res.status(500).json({ message: "Error deleting employee" });
+  }
+});
 app.post('/validateEmployee', async (req, res) => {
   const { email, password } = req.body;
 
@@ -279,6 +293,8 @@ emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
 app.post("/getEmployeeDetails", async (req, res) => {
   const { email,password } = req.body;
+  console.log("Email:", email); // Log the incoming email
+  console.log("Password:", password); // Log the incoming password
 
   try {
     const employee = await Employee.findOne({ email });
@@ -287,8 +303,12 @@ app.post("/getEmployeeDetails", async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, employee.password);
+    console.log("Retrieved Employee:", employee); // Log employee details
+    console.log("Password Valid:", isPasswordValid); // Log password comparison result
+
 
     if (!isPasswordValid) {
+      console.log("Invalid credentials");
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign({ employeeId:employee.employeeId }, emp_secret, {
@@ -301,7 +321,7 @@ app.post("/getEmployeeDetails", async (req, res) => {
         email: employee.email,
         employeeId: employee.employeeId,
         employeeName: employee.name,
-        token:token
+     
       },
     });
   } catch (error) {

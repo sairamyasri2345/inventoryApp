@@ -43,7 +43,7 @@ const Layout = () => {
         const employeeEmail = window.localStorage.getItem("email");
 
         const response = await axios.post(
-          "https://adminapps.onrender.com/getEmployeeDetails",
+          "http://localhost:3001/getEmployeeDetails",
 
           { email: employeeEmail },
           {

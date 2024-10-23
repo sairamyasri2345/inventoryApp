@@ -8,7 +8,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://adminapps.onrender.com/products');
+        const response = await fetch('http://localhost:3001/products');
         const result = await response.json();
         if (result && Array.isArray(result.data)) {
           setProducts(result.data);
