@@ -5,12 +5,12 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("./adminDetails");
 require("./productschema");
-require("./empSchema");
 
 
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
-const Employee = mongoose.model("Employee");
+const employeeSchema = require('../../models/empSchema');
+const Employee = mongoose.model("Employee",employeeSchema);
 
 const app = express();
 const JWT_SECRET =
@@ -143,12 +143,6 @@ app.post("/layout", async (req, res) => {
   }
 });
 
-// app.use(express.static(path.join(__dirname, 'admin/build')));
-
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-// });
-
 app.post("/products", async (req, res) => {
   const { productName, quantity, description } = req.body;
 
@@ -203,41 +197,25 @@ app.get("/products", async (req, res) => {
   }
 });
 
-//add employee
-// app.post('/addEmployees', async (req, res) => {
-//   try {
-//     const { name, employeeId, phoneNumber, designation, department, email, password} = req.body;
-//     const hashedPassword = await bcrypt.hash(initialPassword, 10);
-//     const newEmployee = await Employee.create({name,
-//       employeeId,
-//       phoneNumber,
-//       designation,
-//       department,
-//       email,
-//       initialPassword,  
-//       password:hashedPassword
-//   });
-//     res.status(200).json(newEmployee);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error saving employee' });
-//   }
-// });
-
 app.post("/addEmployees", async (req, res) => {
   try {
     const { employeeId, email } = req.body;
 
     // Check if employee ID or email already exists
     const existingEmployee = await Employee.findOne({
-      $or: [{ employeeId }, { email }]
+      $or: [{ employeeId }, { email }],
     });
 
     if (existingEmployee) {
-      return res.status(409).json({ message: "Employee ID or Email already taken." });
+      return res
+        .status(409)
+        .json({ message: "Employee ID or Email already taken." });
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Proceed with saving the new employee if no conflicts
-    const newEmployee = new Employee(req.body);
+    const newEmployee = new Employee(  {email,
+      password: hashedPassword});
     await newEmployee.save();
 
     return res.status(201).json(newEmployee);
@@ -247,94 +225,96 @@ app.post("/addEmployees", async (req, res) => {
   }
 });
 
-
-
-app.get('/employeeData', async (req, res) => {
+app.get("/employeeData", async (req, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
+emp_secret =
+  "sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh";
 
-// app.get("/employeeData", async (req, res) => {
-//   try {
-//     const employees = await Employee.find();
-//     res.status(200).json(employees);
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
-app.post("/getEmployeeDetails", async (req, res) => {
-  const { email,password } = req.body;
-
-  try {
-    const employee = await Employee.findOne({ email });
-
-    if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
-    }
-    const isPasswordValid = await bcrypt.compare(password, employee.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-    const token = jwt.sign({ employeeId:employee.employeeId }, emp_secret, {
-      expiresIn: "2h",
-    });
-    res.status(200).json({
-      status: "ok",
-      token,
-      employee: {
-        email: employee.email,
-        employeeId: employee.employeeId,
-        employeeName: employee.name,
-        token:token
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-});
-
-// app.put('/changePwd', async (req, res) => {
-//   const { employeeId, newPassword } = req.body;
+  app.post("/getEmployeeDetails", async (req, res) => {
+    const { email, password } = req.body;
   
-//   try {
-//     const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
-    
-//     if (!employee) {
-//       return res.status(404).json({ message: 'Employee not found' });
-//     }
-
-//     res.status(200).json({ message: 'Password updated successfully' });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error', error });
-//   }
-// });
-
+    try {
+      // Find the employee by email (normalize to lowercase)
+      const employee = await Employee.findOne({ email: email.toLowerCase() });
+      if (!employee) {
+        console.log("Employee not found with email:", email);
+        return res.status(404).json({ message: "Employee not found" });
+      }
+  
+      // Log stored password hash and user-entered password for debugging
+      console.log("Stored password hash:", employee.password);
+      console.log("Password entered by user:", password);
+  
+      // Compare the provided password with the stored hash
+      const isPasswordValid = await bcrypt.compare(password, employee.password);
+      console.log("Password validation result:", isPasswordValid);
+  
+      if (!isPasswordValid) {
+        console.log("Invalid credentials for email:", email);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+  
+      // Generate a JWT token if validation is successful
+      const token = jwt.sign({ employeeId: employee.employeeId }, emp_secret, {
+        expiresIn: "2h",
+      });
+  
+      res.status(200).json({
+        status: "ok",
+        token,
+        employee: {
+          email: employee.email,
+          employeeId: employee.employeeId,
+          employeeName: employee.name,
+        },
+      });
+    } catch (error) {
+      console.error("Error in getEmployeeDetails route:", error);
+      res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  app.delete("/deleteEmployee/:id", async (req, res) => {
+    const employeeId = req.params.id;
+  
+    try {
+      const result = await Employee.findByIdAndDelete(employeeId);
+      if (!result) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+      res.status(200).json({ message: "Employee deleted successfully" });
+    } catch (error) {
+      console.error("Error while deleting employee:", error.message);
+      res.status(500).json({ message: "Error deleting employee" });
+    }
+  });
+  
 const saltRounds = 10;
-app.put('/changePwd', async (req, res) => {
+app.put("/changePwd", async (req, res) => {
   const { employeeId, newPassword } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
     const employee = await Employee.findOneAndUpdate(
       { employeeId },
-      { password: hashedPassword },  // Only update the hashed password
+      { password: hashedPassword }, // Only update the hashed password
       { new: true }
     );
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: "Employee not found" });
     }
 
-    res.status(200).json({ message: 'Password updated successfully' });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating password', error });
+    res.status(500).json({ message: "Error updating password", error });
   }
 });
 

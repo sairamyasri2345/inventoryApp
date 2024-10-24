@@ -5,8 +5,11 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 require("./userDetails");
-require("./productApply"); 
 
+require("./productApply"); 
+const employeeSchema = require("../../models/empSchema");
+
+const Employee = mongoose.model("Employee",employeeSchema);
 
 
 const User = mongoose.model("UserInfo");
@@ -55,30 +58,32 @@ app.post("/empSignup", async (req, res) => {
   }
 });
 
-// app.post("/empLogin", async (req, res) => {
-//   const { email, password } = req.body;
+app.post("/empLogin", async (req, res) => {
+  const { email, password } = req.body;
 
-//   try {
-//     const user = await User.findOne({ email });
+  try {
+    const user = await Employee.findOne({ email });
 
-//     if (!user) {
-//       return res.status(404).json({ error: "User Not Found" });
-//     }
+    if (!user) {
+      return res.status(404).json({ error: "User Not Found" });
+    }
 
-//     if (await bcrypt.compare(password, user.password)) {
-//       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-//         expiresIn: "2h",
-//       });
+    // Compare the provided password with the stored password (in plain text, not ideal for production)
+    if (password === user.password) {
+      const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+        expiresIn: "2h",
+      });
 
-//       return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
-//     }
+      return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
+    }
 
-//     return res.status(401).json({ status: "error", error: "Invalid Password" });
-//   } catch (error) {
-//     console.error("Login error:", error);
-//     return res.status(500).json({ status: "error", error: "Server Error" });
-//   }
-// });
+    return res.status(401).json({ status: "error", error: "Invalid Password" });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ status: "error", error: "Server Error" });
+  }
+});
+
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -86,7 +91,7 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: "Unauthorized" });
 
-    req.userId = decoded.employeeId;
+    req.userId = decoded.userId;
     next();
   });
 };
@@ -94,7 +99,7 @@ const verifyToken = (req, res, next) => {
 
 app.put("/changePassword", verifyToken, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const userId = req.employeeId;
+  const userId = req.userId;
 
   try {
     const user = await User.findById(userId);
@@ -152,15 +157,16 @@ app.get("/appliedProducts", async (req, res) => {
   const query = {};
   if (employeeId) query.employeeId = employeeId;
   if (productId) query.productId = productId;
- 
+
   try {
     const products = await ProductApplication.find(query);
-    console.log(products,"prod")
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
+
+
 
 app.post("/applyProduct", async (req, res) => {
   const { employeeId, employeeName, productName, quantity } = req.body;
@@ -178,6 +184,8 @@ app.post("/applyProduct", async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
+
+
 
 const canEditOrDelete = async (req, res, next) => {
   try {
@@ -212,8 +220,8 @@ app.put("/updateProduct/:id", canEditOrDelete, async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
-
-
+// app.put('/appliedProducts/:id', async (req, res) => {
+//   try {
 //     const productId = req.params.id;
 //     const newStatus = req.body.status;
 
@@ -261,12 +269,4 @@ app.delete("/deleteProduct/:id", canEditOrDelete, async (req, res) => {
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }
-});
-
-
-
-const PORT=3003;
-
-app.listen(PORT, () => {
-  console.log("Server started on port 3003");
 });

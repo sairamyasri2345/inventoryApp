@@ -121,12 +121,13 @@ const handleSave = async () => {
 
 
   const handleDelete = async (id) => {
+    console.log(employeeList); // Check if _id is present
+
     console.log("Attempting to delete employee with ID:", id); // Debug log
     try {
       // Make the delete request
-      const response = await axios.delete(
-        `http://localhost:3001/deleteEmployee/${id}`
-      );
+      const response = await axios.delete(`http://localhost:3001/deleteEmployee/${id}`);
+
 
       // Check response status (optional but good for debugging)
       if (response.status === 200) {
