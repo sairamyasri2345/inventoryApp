@@ -5,12 +5,12 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("./adminDetails");
 require("./productschema");
-require("./empSchema");
 
 
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
-const Employee = mongoose.model("Employee");
+const employeeSchema = require('../../models/empSchema');
+const Employee = mongoose.model("Employee",employeeSchema);
 
 const app = express();
 const JWT_SECRET =
@@ -143,12 +143,6 @@ app.post("/layout", async (req, res) => {
   }
 });
 
-// app.use(express.static(path.join(__dirname, 'admin/build')));
-
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-// });
-
 app.post("/products", async (req, res) => {
   const { productName, quantity, description } = req.body;
 
@@ -203,41 +197,39 @@ app.get("/products", async (req, res) => {
   }
 });
 
-//add employee
-// app.post('/addEmployees', async (req, res) => {
-//   try {
-//     const { name, employeeId, phoneNumber, designation, department, email, password} = req.body;
-//     const hashedPassword = await bcrypt.hash(initialPassword, 10);
-//     const newEmployee = await Employee.create({name,
-//       employeeId,
-//       phoneNumber,
-//       designation,
-//       department,
-//       email,
-//       initialPassword,  
-//       password:hashedPassword
-//   });
-//     res.status(200).json(newEmployee);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error saving employee' });
-//   }
-// });
-app.post('/addEmployees', async (req, res) => {
+app.post("/addEmployees", async (req, res) => {
   try {
-    const newEmployee = await Employee.create(req.body);
-    res.status(200).json(newEmployee);
+    const { employeeId, email } = req.body;
+
+    // Check if employee ID or email already exists
+    const existingEmployee = await Employee.findOne({
+      $or: [{ employeeId }, { email }],
+    });
+
+    if (existingEmployee) {
+      return res
+        .status(409)
+        .json({ message: "Employee ID or Email already taken." });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Proceed with saving the new employee if no conflicts
+    const newEmployee = new Employee(  {email,
+      password: hashedPassword});
+    await newEmployee.save();
+
+    return res.status(201).json(newEmployee);
   } catch (error) {
     res.status(500).json({ message: 'Error saving employee' });
   }
 });
 
-
-app.get('/employeeData', async (req, res) => {
+app.get("/employeeData", async (req, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 app.delete("/deleteEmployee/:id", async (req, res) => {
@@ -332,37 +324,24 @@ app.post("/getEmployeeDetails", async (req, res) => {
 // app.put('/changePwd', async (req, res) => {
 //   const { employeeId, newPassword } = req.body;
   
-//   try {
-//     const employee = await Employee.findOneAndUpdate({ employeeId }, { password: newPassword }, { new: true });
-    
-//     if (!employee) {
-//       return res.status(404).json({ message: 'Employee not found' });
-//     }
-
-//     res.status(200).json({ message: 'Password updated successfully' });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error', error });
-//   }
-// });
-
 const saltRounds = 10;
-app.put('/changePwd', async (req, res) => {
+app.put("/changePwd", async (req, res) => {
   const { employeeId, newPassword } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
     const employee = await Employee.findOneAndUpdate(
       { employeeId },
-      { password: hashedPassword },  // Only update the hashed password
+      { password: hashedPassword }, // Only update the hashed password
       { new: true }
     );
 
     if (!employee) {
-      return res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: "Employee not found" });
     }
 
-    res.status(200).json({ message: 'Password updated successfully' });
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating password', error });
+    res.status(500).json({ message: "Error updating password", error });
   }
 });
 

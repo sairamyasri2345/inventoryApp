@@ -19,9 +19,8 @@ const EmpNavbar = ({
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear localStorage and redirect to login page
-    window.localStorage.clear();
-    navigate("/empLogin");
+    // window.localStorage.clear();
+    navigate("/");
   };
 
   const toggleDropdown = () => {
@@ -29,14 +28,16 @@ const EmpNavbar = ({
   };
 
   useEffect(() => {
+    // Format date
     const date = new Date();
     const formattedDate = `${date.getDate()} ${date.toLocaleString("default", {
       month: "long",
     })} ${date.getFullYear()}`;
     setCurrentDate(formattedDate);
 
-    if (userData && userData.employeeName) {
-      const name = userData.employeeName.trim();
+    // Set user initials
+    if (userData && userData.uname) {
+      const name = userData.uname.trim();
       const nameParts = name.split(" ");
       let initials = "";
 
@@ -72,8 +73,12 @@ const EmpNavbar = ({
               />
               <label htmlFor="toggle-sidebar" id="sidebar-toggle-btn">
                 <i
-                  className={`bi ${sidebarCollapsed ? "bi-x" : "bi-list"} icons`}
-                  title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                  className={`bi ${
+                    sidebarCollapsed ? "bi-x" : "bi-list"
+                  } icons`}
+                  title={
+                    sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"
+                  }
                 ></i>
               </label>
               <div className="input-group w-25">
@@ -123,7 +128,7 @@ const EmpNavbar = ({
                       onClick={toggleDropdown}
                       style={{ cursor: "pointer" }}
                     >
-                      {userData?.employeeName || "Employee Name"}
+                      {userData?.uname || "Adison Jack"}
                       <i
                         className={`bi ${
                           dropdownOpen ? "bi-chevron-up" : "bi-chevron-down"

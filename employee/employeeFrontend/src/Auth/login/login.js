@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
+import "./login.css";
 import { Link, useNavigate } from 'react-router-dom';
-import './login.css';
 
 const EmpLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [checkError, setCheckError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [checkError, setCheckError] = useState("");
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -20,65 +20,74 @@ const EmpLogin = () => {
     let valid = true;
 
     if (!email) {
-      setEmailError('Email is required');
+      setEmailError("Email is required");
       valid = false;
     } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError("Please enter a valid email address");
       valid = false;
     } else {
-      setEmailError('');
+      setEmailError("");
     }
 
     if (!password) {
-      setPasswordError('Password is required');
+      setPasswordError("Password is required");
       valid = false;
     } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters long');
+      setPasswordError("Password must be at least 6 characters long");
       valid = false;
     } else {
-      setPasswordError('');
+      setPasswordError("");
     }
 
     if (!isChecked) {
-      setCheckError('Please check this box if you want to proceed');
+      setCheckError("Please check this box if you want to proceed");
       valid = false;
     } else {
-      setCheckError('');
+      setCheckError("");
     }
 
     return valid;
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      const response = await fetch('http://localhost:3001/getEmployeeDetails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-
-      if (data.status === 'ok') {
-        // Store necessary employee data in local storage
-        window.localStorage.setItem('employeeId', data.employee.employeeId);
-        window.localStorage.setItem('email', data.employee.email);
-        window.localStorage.setItem('name', data.employee.employeeName);
-        window.localStorage.setItem('token', data.token);
-
-        // Redirect to dashboard
-        navigate('/layout/dashboard');
-      } else {
-        alert('Incorrect password. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      alert('An error occurred while logging in. Please try again.');
+    if (!validateForm()) {
+      return;
     }
+    fetch("http://localhost:3003/empLogin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "ok") {
+          window.localStorage.setItem("token", data.data.token);
+          window.localStorage.setItem('employeeId', data.data.employeeId);
+          window.localStorage.setItem("loggedIn", true);
+          console.log('Employee ID stored:', data.data.employeeId);
+
+          fetch("http://localhost:3003/layout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: data.data.token }),
+          })
+            .then((res) => res.json())
+            .then((userData) => {
+              if (userData.status === "ok") {
+                window.localStorage.setItem("userData", JSON.stringify(userData.data));
+                navigate("/layout/dashboard");
+              }
+            });
+        } else {
+          alert("Login error");
+        }
+      });
   };
 
   return (
@@ -100,7 +109,7 @@ const EmpLogin = () => {
                   </span>
                 </p>
                 <img
-                  src={require('../assets/bg-img-removebg-preview.png')}
+                  src={require("../assets/bg-img-removebg-preview.png")}
                   alt="woman with laptop"
                   className="img-logo d-block"
                 />
@@ -133,7 +142,7 @@ const EmpLogin = () => {
                 {passwordError && <div className="text-danger d-flex justify-content-end">{passwordError}</div>}
               </div>
               <div className="form-check my-2 d-flex justify-content-between">
-                <div>
+                <div className=''>
                   <input 
                     type="checkbox" 
                     className="form-check-input mt-2" 
@@ -148,6 +157,16 @@ const EmpLogin = () => {
               <button type="submit" className="btn btn-success w-100 btn-lg my-3 rounded-5">
                 LOGIN
               </button>
+              <div className="text-center">
+                <h5>(or)</h5>
+                <h5 className="my-3">
+                  Don't have an account? 
+                  <Link className="nav-link text-white fs-5 d-inline text-decoration-none" to="/empSignup">
+                    <span className="text-success px-1">Register</span>
+                  </Link> 
+                  Here
+                </h5>
+              </div>
             </form>
           </div>
         </div>
