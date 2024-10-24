@@ -97,12 +97,12 @@ const verifyToken = (req, res, next) => {
 };
 
 
-app.put("/changePassword", verifyToken, async (req, res) => {
+app.put("/changePassword", async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const userId = req.userId;
+  const userId = req.employeeId;
 
   try {
-    const user = await User.findById(userId);
+    const user = await Employee.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -129,13 +129,13 @@ app.post("/layout", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await Employee.findById(decoded.userId);
 
     if (!user) {
       throw new Error("User not found");
     }
 
-    res.status(200).json({ status: "ok", data: { uname: user.uname, email: user.email } });
+    res.status(200).json({ status: "ok", data: { uname: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }
