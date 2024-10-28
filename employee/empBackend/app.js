@@ -7,10 +7,9 @@ const bodyParser = require("body-parser");
 require("./userDetails");
 
 require("./productApply"); 
-const employeeSchema = require("../../models/empSchema");
 
-const Employee = mongoose.model("Employee",employeeSchema);
-
+require("../../admin/adminBackend/empSchema")
+const Employee=mongoose.model("employeeSchema")
 
 const User = mongoose.model("UserInfo");
 const ProductApplication = mongoose.model("ProductApplication");
@@ -22,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-const mongoUrl = "mongodb+srv://sairamyasri:n11LrQ1ZnGctgyGk@cluster0.tpqyk0h.mongodb.net/?retryWrites=true&w=majority";
+const mongoUrl = "mongodb+srv://sairamyasri7070:59nNslqOHgZhq9kL@cluster0.vlo2s.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose
   .connect(mongoUrl, {
@@ -36,27 +35,27 @@ mongoose
     console.error("DB connection error:", err);
   });
 
-app.post("/empSignup", async (req, res) => {
-  const { uname, email, password } = req.body;
-  const encryptedPassword = await bcrypt.hash(password, 10);
+// app.post("/empSignup", async (req, res) => {
+//   const { uname, email, password } = req.body;
+//   const encryptedPassword = await bcrypt.hash(password, 10);
 
-  try {
-    const oldUser = await User.findOne({ email });
+//   try {
+//     const oldUser = await User.findOne({ email });
 
-    if (oldUser) {
-      return res.json({ error: "User exists" });
-    }
+//     if (oldUser) {
+//       return res.json({ error: "User exists" });
+//     }
 
-    await User.create({
-      uname,
-      email,
-      password: encryptedPassword,
-    });
-    res.send({ status: "ok" });
-  } catch (err) {
-    res.send({ status: "error", error: err.message });
-  }
-});
+//     await User.create({
+//       uname,
+//       email,
+//       password: encryptedPassword,
+//     });
+//     res.send({ status: "ok" });
+//   } catch (err) {
+//     res.send({ status: "error", error: err.message });
+//   }
+// });
 
 app.post("/empLogin", async (req, res) => {
   const { email, password } = req.body;
@@ -269,4 +268,9 @@ app.delete("/deleteProduct/:id", canEditOrDelete, async (req, res) => {
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }
+});
+const PORT = 3003;
+
+app.listen(PORT, () => {
+  console.log("Server started on port 3003");
 });

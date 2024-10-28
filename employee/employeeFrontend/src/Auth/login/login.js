@@ -49,54 +49,54 @@ const EmpLogin = () => {
     return valid;
   };
 
-  const handleSubmit = async(event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateForm()) return;
 
+    console.log("Logging in with:", { email, password }); // Debug log
+
     try {
-      const response = await fetch('http://localhost:3001/getEmployeeDetails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-   
-      if (response.status === 401) {
-        alert("Invalid credentials. Please try again.");
-        return;
-      }
-  
-      if (response.status === 404) {
-        alert("Employee not found. Please check your email.");
-        return;
-      }
-  
-      if (!response.ok) {
-        throw new Error("An unexpected error occurred");
-      }
-  
-      const data = await response.json();
+        const response = await fetch('http://localhost:3001/getEmployeeDetails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
 
-      if (data.status === 'ok') {
-        // Store necessary employee data in local storage
-        window.localStorage.setItem('employeeId', data.employee.employeeId);
-        window.localStorage.setItem('email', data.employee.email);
-        window.localStorage.setItem('name', data.employee.employeeName);
-        window.localStorage.setItem('token', data.token);
+        if (response.status === 401) {
+            alert("Invalid credentials. Please try again.");
+            return;
+        }
 
-        // Redirect to dashboard
-        navigate('/layout/dashboard');
-      } else {
-        alert('Incorrect password. Please try again.');
-      }
+        if (response.status === 404) {
+            alert("Employee not found. Please check your email.");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("An unexpected error occurred");
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+            // Store necessary employee data in local storage
+            window.localStorage.setItem('employeeId', data.employee.employeeId);
+            window.localStorage.setItem('email', data.employee.email);
+            window.localStorage.setItem('name', data.employee.employeeName);
+            window.localStorage.setItem('token', data.token);
+
+            // Redirect to dashboard
+            navigate('/layout/dashboard');
+        } else {
+            alert('Incorrect password. Please try again.');
+        }
     } catch (error) {
-      console.error('Error logging in:', error);
-      alert('An error occurred while logging in. Please try again.');
+        console.error('Error logging in:', error);
+        alert('An error occurred while logging in. Please try again.');
     }
-  
-     
-  }
+}
 
   return (
     <div className="container-fluid signup-cont d-flex align-items-center justify-content-center vh-100 p-5">

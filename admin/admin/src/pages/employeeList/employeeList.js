@@ -72,7 +72,7 @@ const EmployeeList = ({ darkMode }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get("https://adminapps.onrender.com/employeeData");
+        const response = await axios.get("http://localhost:3001/employeeData");
         console.log("Fetched employee data:", response.data); // Log the fetched data
         setEmployeeList(response.data); // Update state
       } catch (error) {
@@ -90,63 +90,58 @@ const EmployeeList = ({ darkMode }) => {
 
   // Save employee data
 
-const handleSave = async () => {
-  if (!validateForm()) return; // Validate before saving
-
-  try {
-    const response = await axios.post(
-      "http://localhost:3001/addEmployees",
-      employee
-    );
-    console.log("Employee saved:", response.data);
-
-    // If the employee is saved, update the employee list and close the modal
-    if (response.data) {
-      setEmployeeList((prevList) => [...prevList, response.data]);
-    }
-    handleCloseModal();
-  } catch (error) {
-    // Handle validation errors from the backend
-    if (error.response && error.response.status === 400) {
-      setErrors({ form: error.response.data.message });
-    } else if (error.response && error.response.status === 409) {
-      // Handle duplicate employee ID or email
-      setErrors({ form: "Employee ID or Email already taken." });
-    } else {
-      console.error("Error saving employee:", error);
-      setErrors({ form: "An error occurred while saving the employee." });
-    }
-  }
-};
-
-
-  const handleDelete = async (id) => {
-    console.log(employeeList); // Check if _id is present
-
-    console.log("Attempting to delete employee with ID:", id); // Debug log
+  const handleSave = async () => {
+    if (!validateForm()) return; // Validate before saving
+  
     try {
-      // Make the delete request
-      const response = await axios.delete(`http://localhost:3001/deleteEmployee/${id}`);
-
-
-      // Check response status (optional but good for debugging)
-      if (response.status === 200) {
-        // Update employeeList state to remove the deleted employee
-        setEmployeeList((prevList) => prevList.filter((emp) => emp._id !== id));
-        alert("Employee deleted successfully."); // Optional success message
+      const response = await axios.post(
+        "http://localhost:3001/addEmployees",
+        employee
+      );
+  
+      console.log("Employee saved:", response.data);
+  
+      // If the employee is saved, update the employee list and close the modal
+      if (response.data) {
+        setEmployeeList((prevList) => [...prevList, response.data]);
       }
+      handleCloseModal();
     } catch (error) {
-      console.error(
-        "Error deleting employee:",
-        error.response ? error.response.data : error.message
-      );
-      alert(
-        `Error deleting employee: ${
-          error.response?.data?.message || error.message
-        }`
-      );
+      // Handle validation errors from the backend
+      if (error.response && error.response.status === 400) {
+        setErrors({ form: error.response.data.message });
+      } else if (error.response && error.response.status === 409) {
+        // Handle duplicate employee ID or email
+        setErrors({ form: "Employee ID or Email already taken." });
+      } else {
+        console.error("Error saving employee:", error);
+        setErrors({ form: "An error occurred while saving the employee." });
+      }
+    };
     }
-  };
+
+    const handleDelete = async (id) => {
+      try {
+        const response = await axios.delete(`http://localhost:3001/deleteEmployee/${id}`);
+        if (response.status === 200) {
+          setEmployeeList((prevList) => prevList.filter((emp) => emp._id !== id));
+          alert("Employee deleted successfully.");
+        }
+      } catch (error) {
+        console.error(
+          "Error deleting employee:",
+          error.response ? error.response.data : error.message
+        );
+        alert(
+          `Error deleting employee: ${
+            error.response?.data?.message || error.message
+          }`
+        );
+      }
+    };
+    
+    
+    
 
   // Open modal
   const openModal = () => {

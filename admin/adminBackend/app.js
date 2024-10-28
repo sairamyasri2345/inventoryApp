@@ -9,7 +9,7 @@ require("./productschema");
 
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
-const employeeSchema = require('../../models/empSchema');
+const employeeSchema = require('./empSchema');
 const Employee = mongoose.model("Employee",employeeSchema);
 
 const app = express();
@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 const mongoUrl =
-  "mongodb+srv://sairamyasri:n11LrQ1ZnGctgyGk@cluster0.tpqyk0h.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://sairamyasri7070:59nNslqOHgZhq9kL@cluster0.vlo2s.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose
   .connect(mongoUrl, {
@@ -199,35 +199,37 @@ app.get("/products", async (req, res) => {
 
 app.post("/addEmployees", async (req, res) => {
   try {
-    const { employeeId, email } = req.body;
+    const { employeeId, email, name, password } = req.body;
 
-    // Check if employee ID or email already exists
+    // Check for existing employee logic
     const existingEmployee = await Employee.findOne({
-      $or: [{ employeeId }, { email }],
+      $or: [{ employeeId }, { email }]
     });
 
     if (existingEmployee) {
-      return res
-        .status(409)
-        .json({ message: "Employee ID or Email already taken." });
+      return res.status(409).json({ message: "Employee ID or Email already taken." });
     }
+
+    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Proceed with saving the new employee if no conflicts
-    const newEmployee = new Employee(  {email,
-      password: hashedPassword});
+    // Create a new employee with the hashed password
+    const newEmployee = new Employee({ ...req.body, password: hashedPassword });
     await newEmployee.save();
 
     return res.status(201).json(newEmployee);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    res.status(500).json({ message: 'Server error occurred.' });
     console.error("Error saving employee:", error);
-    return res.status(500).json({ message: "Server error occurred." });
   }
 });
 
 
-
-app.get('/employeeData', async (req, res) => {
+app.get("/employeeData", async (req, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
@@ -235,6 +237,23 @@ app.get('/employeeData', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+app.delete("/deleteEmployee/:id", async (req, res) => {
+const id = req.params.id;
+console.log("Received ID for deletion:", id);
+
+try {
+  const result = await Employee.findByIdAndDelete(id);
+  if (!result) {
+    return res.status(404).json({ message: "Employee not found" });
+  }
+  res.status(200).json({ message: "Employee deleted successfully" });
+} catch (error) {
+  console.error("Error while deleting employee:", error.message);
+  res.status(500).json({ message: "Error deleting employee" });
+}
+});
+
+
 
 
 // app.get("/employeeData", async (req, res) => {
@@ -247,35 +266,39 @@ app.get('/employeeData', async (req, res) => {
 // });
 emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
+
 app.post("/getEmployeeDetails", async (req, res) => {
-  const { email,password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const employee = await Employee.findOne({ email });
+      const employee = await Employee.findOne({ email });
 
-    if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
-    }
-    const isPasswordValid = await bcrypt.compare(password, employee.password);
+      if (!employee) {
+          return res.status(404).json({ message: "Employee not found" });
+      }
 
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-    const token = jwt.sign({ employeeId:employee.employeeId }, emp_secret, {
-      expiresIn: "2h",
-    });
-    res.status(200).json({
-      status: "ok",
-      token,
-      employee: {
-        email: employee.email,
-        employeeId: employee.employeeId,
-        employeeName: employee.name,
-        token:token
-      },
-    });
+      // Compare the plain text password directly
+      if (password === employee.password) {
+        console.log("Password match for:", email);
+          const token = jwt.sign({ employeeId: employee.employeeId }, "asdfvgfbrhetgfb@R$%@^&UI(IHJ#&TY$G!rj%^&YIHJBefu#%^&*(UIHJqb))", {
+              expiresIn: "2h",
+          });
+
+          return res.status(200).json({
+              status: "ok",
+              token,
+              employee: {
+                  email: employee.email,
+                  employeeId: employee.employeeId,
+                  employeeName: employee.name,
+              },
+          });
+      } else {
+          return res.status(401).json({ message: "Invalid credentials" });
+      }
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Server error", error });
   }
 });
 
