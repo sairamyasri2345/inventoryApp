@@ -42,7 +42,7 @@ const Layout = () => {
         const token = window.localStorage.getItem("token");
 
         const response = await fetch(
-          "https://adminapps.onrender.com/layout",
+          "http://localhost:3001/layout",
           {
             method: "POST",
             headers: {

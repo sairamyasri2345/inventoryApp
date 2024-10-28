@@ -266,9 +266,8 @@ try {
 // });
 emp_secret="sedrcfvgbhjne7fstfyegbh5hrwygbtruiygbhutierghwgeu5tbui4wiehtuebrteh"
 
-
 app.post("/getEmployeeDetails", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password,name } = req.body;
 
   try {
       const employee = await Employee.findOne({ email });
@@ -280,7 +279,7 @@ app.post("/getEmployeeDetails", async (req, res) => {
       // Compare the plain text password directly
       if (password === employee.password) {
         console.log("Password match for:", email);
-          const token = jwt.sign({ employeeId: employee.employeeId }, emp_secret, {
+          const token = jwt.sign({ employeeId: employee.employeeId },emp_secret, {
               expiresIn: "2h",
           });
 
@@ -300,7 +299,7 @@ app.post("/getEmployeeDetails", async (req, res) => {
       console.error("Error during login:", error);
       res.status(500).json({ message: "Server error", error });
   }
-});
+}); 
 
 // app.put('/changePwd', async (req, res) => {
 //   const { employeeId, newPassword } = req.body;
