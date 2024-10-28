@@ -8,8 +8,7 @@ require("./userDetails");
 
 require("./productApply"); 
 
-require("../../admin/adminBackend/empSchema")
-const Employee=mongoose.model("employeeSchema")
+
 
 const User = mongoose.model("UserInfo");
 const ProductApplication = mongoose.model("ProductApplication");
@@ -57,31 +56,31 @@ mongoose
 //   }
 // });
 
-app.post("/empLogin", async (req, res) => {
-  const { email, password } = req.body;
+// app.post("/empLogin", async (req, res) => {
+//   const { email, password } = req.body;
 
-  try {
-    const user = await Employee.findOne({ email });
+//   try {
+//     const user = await Employee.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ error: "User Not Found" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ error: "User Not Found" });
+//     }
 
-    // Compare the provided password with the stored password (in plain text, not ideal for production)
-    if (password === user.password) {
-      const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-        expiresIn: "2h",
-      });
+//     // Compare the provided password with the stored password (in plain text, not ideal for production)
+//     if (password === user.password) {
+//       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+//         expiresIn: "2h",
+//       });
 
-      return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
-    }
+//       return res.status(200).json({ status: "ok", data: { token, employeeId: user.email } });
+//     }
 
-    return res.status(401).json({ status: "error", error: "Invalid Password" });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ status: "error", error: "Server Error" });
-  }
-});
+//     return res.status(401).json({ status: "error", error: "Invalid Password" });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.status(500).json({ status: "error", error: "Server Error" });
+//   }
+// });
 
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];

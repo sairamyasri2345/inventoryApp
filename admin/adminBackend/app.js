@@ -9,8 +9,8 @@ require("./productschema");
 
 const User = mongoose.model("AdminPageInfo");
 const Product = mongoose.model("Product");
-const employeeSchema = require('./empSchema');
-const Employee = mongoose.model("Employee",employeeSchema);
+require("./empSchema")
+const Employee = mongoose.model("Employee");
 
 const app = express();
 const JWT_SECRET =
@@ -280,7 +280,7 @@ app.post("/getEmployeeDetails", async (req, res) => {
       // Compare the plain text password directly
       if (password === employee.password) {
         console.log("Password match for:", email);
-          const token = jwt.sign({ employeeId: employee.employeeId }, "asdfvgfbrhetgfb@R$%@^&UI(IHJ#&TY$G!rj%^&YIHJBefu#%^&*(UIHJqb))", {
+          const token = jwt.sign({ employeeId: employee.employeeId }, emp_secret, {
               expiresIn: "2h",
           });
 
