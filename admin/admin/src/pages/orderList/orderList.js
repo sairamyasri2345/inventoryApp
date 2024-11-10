@@ -3,6 +3,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./orderList.css";
 import axios from "axios";
 
+
 const Order = ({ filterText, darkMode}) => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +19,7 @@ const Order = ({ filterText, darkMode}) => {
       );
       if (response.status === 200) {
         console.log("Fetched products:", response.data);
+
         setProducts(response.data);
       } else {
         console.error("Error fetching products:", response.data.error);
@@ -33,28 +35,53 @@ const Order = ({ filterText, darkMode}) => {
     fetchProducts();
   }, []);
 
-  const handleStatusChange = async (productId, newStatus) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
-        product._id === productId ? { ...product, status: newStatus } : product
-      )
-    );
+  // const handleStatusChange = async (productId, newStatus) => {
+  //   setProducts(prevProducts =>
+  //     prevProducts.map(product =>
+  //       product._id === productId ? { ...product, status: newStatus } : product
+  //     )
+  //   );
   
+  //   try {
+  //     const response = await axios.put(`http://localhost:3003/appliedProducts/${productId}`, { status: newStatus });
+  //     if (response.status === 200) {
+  //       console.log('Status updated successfully:', response.data);
+  //       socket.emit("statusUpdated", { productId, status: newStatus });
+  //       fetchProducts();
+  //     } else {
+  //       console.error('Error updating status:', response.data.error);
+  //       fetchProducts()
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating status:', error);
+  //     fetchProducts()
+  //   }
+  // };
+
+
+  const handleStatusChange = async (productId, newStatus) => {
     try {
       const response = await axios.put(`http://localhost:3003/appliedProducts/${productId}`, { status: newStatus });
       if (response.status === 200) {
-        console.log('Status updated successfully:', response.data);
-        fetchProducts();
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product._id === productId ? { ...product, status: newStatus } : product
+          )
+        );
+
+        // Emit a socket event to notify the employee side
+        socket.emit("statusUpdated", {
+          productId,
+          status: newStatus,
+          employeeId: response.data.employeeId,
+        });
       } else {
-        console.error('Error updating status:', response.data.error);
-        fetchProducts()
+        console.error("Error updating status:", response.data.error);
       }
     } catch (error) {
-      console.error('Error updating status:', error);
-      fetchProducts()
+      console.error("Error updating status:", error);
     }
   };
-
   const filteredData = products.filter(
     (item) =>
       (item.employeeId || "").includes(filterText) ||

@@ -42,7 +42,6 @@ const Layout = () => {
         const token = window.localStorage.getItem("token");
         console.log(token,"token")
         const employeeEmail = window.localStorage.getItem("email");
-        console.log("Employee Email:", employeeEmail); 
     
         const response = await axios.post("http://localhost:3001/getEmployeeDetails", { 
           email: employeeEmail 
@@ -51,7 +50,6 @@ const Layout = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log("Response data:", response.data); 
     
         if (response.data.status === "ok") {
           console.log("User data fetched:", response.data.employee);

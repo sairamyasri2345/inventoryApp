@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+
+
 const bodyParser = require("body-parser");
 require("./userDetails");
 
@@ -82,46 +84,8 @@ mongoose
 //   }
 // });
 
-const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ error: "Unauthorized" });
-
-    req.userId = decoded.userId;
-    next();
-  });
-};
 
 
-app.put("/changePassword", async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  const userId = req.employeeId;
-
-  try {
-    const user = await Employee.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ error: "Old password is incorrect" });
-    }
-
-    const encryptedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = encryptedPassword;
-    await user.save();
-
-    res.status(200).json({ status: "Password changed successfully" });
-  } catch (error) {
-    console.error("Error changing password:", error.message);
-    res.status(500).json({ error: "Failed to change password" });
-  }
-});
 app.post("/layout", async (req, res) => {
   const { token } = req.body;
 
@@ -138,6 +102,7 @@ app.post("/layout", async (req, res) => {
     res.status(500).json({ status: "error", error: error.message });
   }
 });
+
 
 app.get("/appliedProducts/:employeeId", async (req, res) => {
   const { employeeId } = req.params;
@@ -185,25 +150,8 @@ app.post("/applyProduct", async (req, res) => {
 
 
 
-const canEditOrDelete = async (req, res, next) => {
-  try {
-    const product = await ProductApplication.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
 
-    const timeDifference = (new Date() - new Date(product.createdAt)) / 60000; // Difference in minutes
-    if (timeDifference > 25) {
-      return res.status(403).json({ error: "You can only edit or delete the product within 25 minutes of applying." });
-    }
-
-    req.product = product;
-    next();
-  } catch (error) {
-    res.status(500).json({ error: "Server Error" });
-  }
-};
-app.put("/updateProduct/:id", canEditOrDelete, async (req, res) => {
+app.put("/updateProduct/:id",  async (req, res) => {
   const { id } = req.params;
   const { employeeId, employeeName, productName, quantity } = req.body;
   
@@ -250,6 +198,10 @@ app.put('/appliedProducts/:id', async (req, res) => {
     );
 
     if (updatedProduct) {
+      io.emit("statusUpdated", {
+        productId: updatedProduct._id,
+        status: updatedProduct.status,
+        employeeId: updatedProduct.employeeId,})
       res.status(200).json(updatedProduct);
     } else {
       res.status(404).json({ error: 'Product not found' });
@@ -258,7 +210,7 @@ app.put('/appliedProducts/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to update product status' });
   }
 });
-app.delete("/deleteProduct/:id", canEditOrDelete, async (req, res) => {
+app.delete("/deleteProduct/:id", async (req, res) => {
   const { id } = req.params;
   
   try {

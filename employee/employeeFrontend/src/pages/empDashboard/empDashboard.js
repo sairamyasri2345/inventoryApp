@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import EmpProduct from "./productModal/productModal";
 import axios from "axios";
 
+
 const EmployeeDashboard = ({ filterText, userData }) => {
   const [show, setShow] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -17,11 +18,16 @@ const EmployeeDashboard = ({ filterText, userData }) => {
   const TIME_LIMIT = 25 * 60 * 1000;
 
   const fetchAppliedProducts = async () => {
+    const token = window.localStorage.getItem("token");
     const employeeId = window.localStorage.getItem("employeeId");
     try {
       const response = await axios.get(
-        `http://localhost:3003/appliedProducts/${employeeId}`
-      );
+        `http://localhost:3003/appliedProducts/${employeeId}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        
+    });
       if (response.status === 200) {
         setAppliedProducts(response.data);
       }
@@ -89,7 +95,7 @@ const EmployeeDashboard = ({ filterText, userData }) => {
     // Include employeeId in the formData if necessary
     const updatedFormData = {
       ...formData,
-      employeeId: employeeId, // Add employeeId to formData
+      employeeId: employeeId, 
     };
 
     try {

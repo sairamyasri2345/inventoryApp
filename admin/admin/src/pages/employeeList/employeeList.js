@@ -23,46 +23,16 @@ const EmployeeList = ({ darkMode }) => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate name (must be a non-empty string)
     if (!employee.name) newErrors.name = "Name is required.";
-
-    // Validate employeeId (must be a number)
-    if (!employee.employeeId) {
-      newErrors.employeeId = "Employee ID is required.";
-    } else if (isNaN(employee.employeeId)) {
-      newErrors.employeeId = "Employee ID must be a number.";
-    }
-
-    // Validate phone number (must be numeric and exactly 10 digits)
-    if (!employee.phoneNumber) {
+    if (!employee.employeeId) newErrors.employeeId = "Employee ID is required.";
+    if (!employee.phoneNumber)
       newErrors.phoneNumber = "Phone number is required.";
-    } else if (!/^\d{10}$/.test(employee.phoneNumber)) {
+    else if (employee.phoneNumber.length !== 10)
       newErrors.phoneNumber = "Phone number must be 10 digits.";
-    }
-
-    // Validate email (must be a valid email)
-    if (!employee.email) {
-      newErrors.email = "Email is required.";
-    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(employee.email)) {
-      newErrors.email = "Email is not valid.";
-    }
-
-    // Validate designation (must be non-empty string)
-    if (!employee.designation) {
+    if (!employee.designation)
       newErrors.designation = "Designation is required.";
-    } else if (!isNaN(employee.designation)) {
-      newErrors.designation = "Designation must be text.";
-    }
-
-    // Validate department (must be non-empty string)
-    if (!employee.department) {
-      newErrors.department = "Department is required.";
-    } else if (!isNaN(employee.department)) {
-      newErrors.department = "Department must be text.";
-    }
-
-    // Validate password (must be non-empty)
+    if (!employee.department) newErrors.department = "Department is required.";
+    if (!employee.email) newErrors.email = "Email is required.";
     if (!employee.password) newErrors.password = "Password is required.";
 
     setErrors(newErrors);
@@ -89,59 +59,23 @@ const EmployeeList = ({ darkMode }) => {
   };
 
   // Save employee data
-
   const handleSave = async () => {
     if (!validateForm()) return; // Validate before saving
-  
+
     try {
       const response = await axios.post(
         "http://localhost:3001/addEmployees",
         employee
       );
-  
       console.log("Employee saved:", response.data);
-  
-      // If the employee is saved, update the employee list and close the modal
       if (response.data) {
         setEmployeeList((prevList) => [...prevList, response.data]);
       }
       handleCloseModal();
     } catch (error) {
-      // Handle validation errors from the backend
-      if (error.response && error.response.status === 400) {
-        setErrors({ form: error.response.data.message });
-      } else if (error.response && error.response.status === 409) {
-        // Handle duplicate employee ID or email
-        setErrors({ form: "Employee ID or Email already taken." });
-      } else {
-        console.error("Error saving employee:", error);
-        setErrors({ form: "An error occurred while saving the employee." });
-      }
-    };
+      console.error("Error saving employee:", error);
     }
-
-    const handleDelete = async (id) => {
-      try {
-        const response = await axios.delete(`http://localhost:3001/deleteEmployee/${id}`);
-        if (response.status === 200) {
-          setEmployeeList((prevList) => prevList.filter((emp) => emp._id !== id));
-          alert("Employee deleted successfully.");
-        }
-      } catch (error) {
-        console.error(
-          "Error deleting employee:",
-          error.response ? error.response.data : error.message
-        );
-        alert(
-          `Error deleting employee: ${
-            error.response?.data?.message || error.message
-          }`
-        );
-      }
-    };
-    
-    
-    
+  };
 
   // Open modal
   const openModal = () => {
@@ -207,7 +141,6 @@ const EmployeeList = ({ darkMode }) => {
                       <th>Phone</th>
                       <th>Designation</th>
                       <th>Department</th>
-                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,19 +151,9 @@ const EmployeeList = ({ darkMode }) => {
                           <td>{emp.employeeId}</td>
                           <td>{emp.email}</td>
                           <td>{emp.password}</td>
-
                           <td>{emp.phoneNumber}</td>
                           <td>{emp.designation}</td>
                           <td>{emp.department}</td>
-                          <td>
-                            {" "}
-                            <button
-                              className="btn btn-danger me-2 btn-sm"
-                              onClick={() => handleDelete(emp._id)}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
                         </tr>
                       ))
                     ) : (

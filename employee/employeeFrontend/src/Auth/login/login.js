@@ -53,53 +53,45 @@ const EmpLogin = () => {
     event.preventDefault();
     if (!validateForm()) return;
 
-    console.log("Logging in with:", { email, password }); // Debug log
-
     try {
-        const response = await fetch('http://localhost:3001/getEmployeeDetails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
+      const response = await fetch("http://localhost:3001/getEmployeeDetails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email,password }),
+      });
+      const data = await response.json();
 
-        if (response.status === 401) {
-            alert("Invalid credentials. Please try again.");
-            return;
+      if (data.status === 'ok') {
+        // Check if the entered password matches the one stored in the admin database
+        if (data.employee.password === password) {
+          // Store necessary employee data in local storage
+          window.localStorage.setItem('employeeId', data.employee.employeeId);
+          window.localStorage.setItem('email', data.employee.email);
+           window.localStorage.setItem('token', data.token);
+      
+           const token= window.localStorage.getItem('token', data.token);
+       
+        console.log(token, "refresh token"); 
+
+           console.log(token,"token")
+          // Redirect to dashboard
+          navigate("/layout/dashboard");
+        }else {
+          alert("Incorrect password. Please try again.");
         }
-
-        if (response.status === 404) {
-            alert("Employee not found. Please check your email.");
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error("An unexpected error occurred");
-        }
-
-        const data = await response.json();
-
-        if (data.status === 'ok') {
-            // Store necessary employee data in local storage
-            window.localStorage.setItem('employeeId', data.employee.employeeId);
-            window.localStorage.setItem('email', data.employee.email);
-            window.localStorage.setItem('name', data.employee.employeeName);
-            window.localStorage.setItem('token', data.token);
-
-            // Redirect to dashboard
-            navigate('/layout/dashboard');
-        } else {
-            alert('Incorrect password. Please try again.');
-        }
+      } else {
+        alert("Employee not found. Please check your email.");
+      }
     } catch (error) {
-        console.error('Error logging in:', error);
-        alert('An error occurred while logging in. Please try again.');
+      console.error("Error logging in:", error);
+      alert("An error occurred while logging in. Please try again.");
     }
-}
+  };
 
   return (
-    <div className="container-fluid signup-cont d-flex align-items-center justify-content-center vh-100 p-5">
+    <div className="container-fluid signup-cont d-flex align-items-center justify-content-center vh-100 ">
       <div className="row justify-content-center w-100">
         <div className="col-lg-11 d-flex justify-content-center align-items-center">
           <div className="form-container d-flex flex-column flex-md-row bg-white shadow-sm rounded-5 w-100">
